@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏛️ 기억의 궁전</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -15,225 +14,1064 @@
 
     <script type="text/babel">
         const { useState, useEffect } = React;
-        const { createClient } = supabase;
 
-        // Supabase 설정 (환경 변수로 대체 필요)
-        const SUPABASE_URL = import.meta.env?.VITE_SUPABASE_URL || '';
-        const SUPABASE_ANON_KEY = import.meta.env?.VITE_SUPABASE_ANON_KEY || '';
+        // 아이콘 컴포넌트들
+        const Home = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
+        const Building2 = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>;
+        const Trees = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>;
+        const ShoppingBag = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>;
+        const BookOpen = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>;
+        const Briefcase = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>;
+        const TrainFront = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>;
+        const Save = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>;
+        const Trash2 = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>;
+        const AlertTriangle = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>;
+        const Plus = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>;
+        const Eye = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>;
+        const EyeOff = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>;
 
-        let supabaseClient = null;
-        if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-            supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
+        const LOCATION_ICONS = {
+          '집': Home,
+          '학교': Building2,
+          '공원': Trees,
+          '쇼핑몰': ShoppingBag,
+          '박물관': Building2,
+          '도서관': BookOpen,
+          '사무실': Briefcase,
+          '지하철역': TrainFront,
+        };
 
-        function App() {
-            const [session, setSession] = useState(null);
-            const [loading, setLoading] = useState(true);
+        const LOCATION_IMAGES = {
+          '집': 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="%23FFF3E0" width="200" height="200"/><path fill="%23D84315" d="M100 30 L30 80 L30 170 L170 170 L170 80 Z"/><rect fill="%23795548" x="80" y="120" width="40" height="50"/><rect fill="%2364B5F6" x="50" y="100" width="30" height="30"/><rect fill="%2364B5F6" x="120" y="100" width="30" height="30"/></svg>',
+          '학교': 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="%23E3F2FD" width="200" height="200"/><rect fill="%23F44336" x="40" y="60" width="120" height="110"/><rect fill="%2364B5F6" x="60" y="80" width="25" height="25"/><rect fill="%2364B5F6" x="115" y="80" width="25" height="25"/><rect fill="%2364B5F6" x="60" y="120" width="25" height="25"/><rect fill="%2364B5F6" x="115" y="120" width="25" height="25"/><rect fill="%23795548" x="85" y="130" width="30" height="40"/><path fill="%23D84315" d="M100 40 L30 60 L40 60 L40 55 L160 55 L160 60 L170 60 Z"/></svg>',
+          '공원': 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="%23C8E6C9" width="200" height="200"/><circle fill="%232E7D32" cx="80" cy="60" r="30"/><circle fill="%23388E3C" cx="120" cy="70" r="35"/><circle fill="%232E7D32" cx="100" cy="50" r="25"/><rect fill="%23795548" x="95" y="80" width="10" height="30"/><rect fill="%2364B5F6" x="40" y="150" width="120" height="10" rx="5"/><circle fill="%23FFEB3B" cx="50" cy="50" r="8"/></svg>',
+          '쇼핑몰': 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="%23FFE0B2" width="200" height="200"/><rect fill="%23FF6F00" x="30" y="70" width="140" height="100"/><rect fill="%2364B5F6" x="50" y="90" width="40" height="50"/><rect fill="%2364B5F6" x="110" y="90" width="40" height="50"/><rect fill="%23795548" x="85" y="120" width="30" height="50"/><text x="100" y="60" font-size="24" fill="%23FF6F00" text-anchor="middle" font-weight="bold">SHOP</text></svg>',
+          '박물관': 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="%23F3E5F5" width="200" height="200"/><path fill="%237B1FA2" d="M100 30 L30 70 L30 75 L170 75 L170 70 Z"/><rect fill="%239C27B0" x="40" y="75" width="15" height="90"/><rect fill="%239C27B0" x="70" y="75" width="15" height="90"/><rect fill="%239C27B0" x="115" y="75" width="15" height="90"/><rect fill="%239C27B0" x="145" y="75" width="15" height="90"/><rect fill="%237B1FA2" x="30" y="165" width="140" height="10"/></svg>',
+          '도서관': 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="%23E8F5E9" width="200" height="200"/><rect fill="%2343A047" x="40" y="60" width="120" height="100"/><rect fill="%23F44336" x="55" y="70" width="15" height="80"/><rect fill="%232196F3" x="75" y="70" width="15" height="80"/><rect fill="%23FFC107" x="95" y="70" width="15" height="80"/><rect fill="%239C27B0" x="115" y="70" width="15" height="80"/><rect fill="%2343A047" x="135" y="70" width="15" height="80"/></svg>',
+          '사무실': 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="%23E3F2FD" width="200" height="200"/><rect fill="%23424242" x="50" y="40" width="100" height="130"/><rect fill="%2364B5F6" x="60" y="50" width="15" height="15"/><rect fill="%2364B5F6" x="85" y="50" width="15" height="15"/><rect fill="%2364B5F6" x="110" y="50" width="15" height="15"/><rect fill="%2364B5F6" x="135" y="50" width="15" height="15"/><rect fill="%2364B5F6" x="60" y="75" width="15" height="15"/><rect fill="%2364B5F6" x="85" y="75" width="15" height="15"/><rect fill="%2364B5F6" x="110" y="75" width="15" height="15"/><rect fill="%2364B5F6" x="135" y="75" width="15" height="15"/><rect fill="%2364B5F6" x="60" y="100" width="15" height="15"/><rect fill="%2364B5F6" x="85" y="100" width="15" height="15"/><rect fill="%2364B5F6" x="110" y="100" width="15" height="15"/><rect fill="%2364B5F6" x="135" y="100" width="15" height="15"/></svg>',
+          '지하철역': 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="%23E1F5FE" width="200" height="200"/><rect fill="%230277BD" x="60" y="60" width="80" height="90" rx="10"/><rect fill="%2364B5F6" x="70" y="75" width="25" height="30"/><rect fill="%2364B5F6" x="105" y="75" width="25" height="30"/><circle fill="%23FFD54F" cx="82" cy="120" r="6"/><circle fill="%23FFD54F" cx="118" cy="120" r="6"/><path fill="%230277BD" d="M70 150 L60 165 M130 150 L140 165"/><text x="100" y="70" font-size="16" fill="%23FFEB3B" text-anchor="middle" font-weight="bold">M</text></svg>'
+        };
 
-            useEffect(() => {
-                if (!supabaseClient) {
-                    setLoading(false);
-                    return;
-                }
+        const DEFAULT_LOCATIONS = ['집', '학교', '공원', '쇼핑몰', '박물관', '도서관', '사무실', '지하철역'];
 
-                supabaseClient.auth.getSession().then(({ data: { session } }) => {
-                    setSession(session);
-                    setLoading(false);
-                });
+        const SUB_LOCATIONS = {
+          '집': ['현관', '거실', '주방', '안방', '작은방', '화장실', '베란다'],
+          '학교': ['교실', '복도', '운동장', '도서실', '급식실', '강당', '과학실'],
+          '공원': ['벤치', '분수대', '놀이터', '산책로', '매점', '정자', '화단'],
+          '쇼핑몰': ['입구', '푸드코트', '의류매장', '전자제품매장', '서점', '화장품매장', '주차장'],
+          '박물관': ['입구홀', '전시실1', '전시실2', '뮤지엄샵', '카페', '강당', '야외전시장'],
+          '도서관': ['입구', '열람실', '서가', '대출데스크', '카페', '스터디룸', '휴게실'],
+          '사무실': ['입구', '회의실', '개인좌석', '휴게실', '복사실', '탕비실', '테라스'],
+          '지하철역': ['개찰구', '플랫폼', '에스컬레이터', '대합실', '편의점', '벤치', '출구']
+        };
 
-                const {
-                    data: { subscription },
-                } = supabaseClient.auth.onAuthStateChange((_event, session) => {
-                    setSession(session);
-                });
+        const CATEGORY_LOCATIONS = {
+          '역사': ['박물관', '도서관', '사무실'],
+          '과학': ['학교', '박물관', '공원'],
+          '수학': ['학교', '사무실', '도서관'],
+          '언어': ['도서관', '학교', '집'],
+          '업무': ['사무실', '지하철역', '쇼핑몰'],
+          '기타': ['집', '공원', '쇼핑몰']
+        };
 
-                return () => subscription.unsubscribe();
-            }, []);
+        function MemoryPalaceApp() {
+          const [activeTab, setActiveTab] = useState('create');
+          const [palaces, setPalaces] = useState([]);
+          const [locations, setLocations] = useState(DEFAULT_LOCATIONS);
+          const [locationUsage, setLocationUsage] = useState({});
+          const [newLocation, setNewLocation] = useState('');
+          const [palaceName, setPalaceName] = useState('');
+          const [category, setCategory] = useState('기타');
+          const [items, setItems] = useState('');
+          const [selectedLocation, setSelectedLocation] = useState('');
+          const [selectedSubLocation, setSelectedSubLocation] = useState('');
+          const [showWarning, setShowWarning] = useState(false);
+          const [quizMode, setQuizMode] = useState(false);
+          const [currentQuiz, setCurrentQuiz] = useState(null);
+          const [revealedItems, setRevealedItems] = useState([]);
+          const [sortBy, setSortBy] = useState('date');
+          const [filterCategory, setFilterCategory] = useState('all');
+          const [expandedLocation, setExpandedLocation] = useState(null);
+          const [geminiApiKey, setGeminiApiKey] = useState('');
+          const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+          const [aiLoading, setAiLoading] = useState(false);
+          const [aiStory, setAiStory] = useState('');
 
-            if (loading) {
-                return (
-                    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-                        <div className="text-center">
-                            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
-                            <p className="text-gray-600">로딩 중...</p>
-                        </div>
-                    </div>
-                );
+          useEffect(() => {
+            const savedPalaces = localStorage.getItem('memoryPalaces');
+            const savedLocations = localStorage.getItem('customLocations');
+            const savedUsage = localStorage.getItem('locationUsage');
+            const savedApiKey = localStorage.getItem('geminiApiKey');
+
+            if (savedPalaces) setPalaces(JSON.parse(savedPalaces));
+            if (savedLocations) setLocations([...DEFAULT_LOCATIONS, ...JSON.parse(savedLocations)]);
+            if (savedUsage) setLocationUsage(JSON.parse(savedUsage));
+            if (savedApiKey) setGeminiApiKey(savedApiKey);
+          }, []);
+
+          const saveData = (newPalaces, newUsage) => {
+            localStorage.setItem('memoryPalaces', JSON.stringify(newPalaces));
+            localStorage.setItem('locationUsage', JSON.stringify(newUsage));
+          };
+
+          useEffect(() => {
+            if (category && CATEGORY_LOCATIONS[category]) {
+              const recommended = CATEGORY_LOCATIONS[category][0];
+              setSelectedLocation(recommended);
+              if (SUB_LOCATIONS[recommended]) {
+                setSelectedSubLocation(SUB_LOCATIONS[recommended][0]);
+              } else {
+                setSelectedSubLocation('');
+              }
+              const fullLocation = SUB_LOCATIONS[recommended]
+                ? `${recommended} > ${SUB_LOCATIONS[recommended][0]}`
+                : recommended;
+              const usage = locationUsage[fullLocation] || 0;
+              setShowWarning(usage > 0);
+            }
+          }, [category, locationUsage]);
+
+          const handleLocationChange = (location) => {
+            setSelectedLocation(location);
+            if (SUB_LOCATIONS[location]) {
+              setSelectedSubLocation(SUB_LOCATIONS[location][0]);
+            } else {
+              setSelectedSubLocation('');
+            }
+            const fullLocation = SUB_LOCATIONS[location]
+              ? `${location} > ${SUB_LOCATIONS[location][0]}`
+              : location;
+            const usage = locationUsage[fullLocation] || 0;
+            setShowWarning(usage > 0);
+          };
+
+          const handleSubLocationChange = (subLocation) => {
+            setSelectedSubLocation(subLocation);
+            const fullLocation = `${selectedLocation} > ${subLocation}`;
+            const usage = locationUsage[fullLocation] || 0;
+            setShowWarning(usage > 0);
+          };
+
+          const createPalace = () => {
+            if (!palaceName || !items || !selectedLocation) {
+              alert('모든 필드를 입력해주세요!');
+              return;
             }
 
-            if (!supabaseClient) {
-                return <MemoryPalaceApp supabase={null} session={null} />;
+            const itemList = items.split(',').map(item => item.trim()).filter(item => item);
+
+            if (itemList.length === 0) {
+              alert('최소 1개 이상의 항목을 입력해주세요!');
+              return;
             }
 
-            if (!session) {
-                return <AuthPage supabase={supabaseClient} />;
-            }
+            const fullLocation = selectedSubLocation
+              ? `${selectedLocation} > ${selectedSubLocation}`
+              : selectedLocation;
 
-            return <MemoryPalaceApp supabase={supabaseClient} session={session} />;
-        }
-
-        function AuthPage({ supabase }) {
-            const [isLogin, setIsLogin] = useState(true);
-            const [email, setEmail] = useState('');
-            const [password, setPassword] = useState('');
-            const [loading, setLoading] = useState(false);
-            const [message, setMessage] = useState('');
-
-            const handleAuth = async (e) => {
-                e.preventDefault();
-                setLoading(true);
-                setMessage('');
-
-                try {
-                    if (isLogin) {
-                        const { error } = await supabase.auth.signInWithPassword({
-                            email,
-                            password,
-                        });
-                        if (error) throw error;
-                    } else {
-                        const { error } = await supabase.auth.signUp({
-                            email,
-                            password,
-                        });
-                        if (error) throw error;
-                        setMessage('회원가입이 완료되었습니다! 이메일을 확인해주세요.');
-                    }
-                } catch (error) {
-                    setMessage(error.message);
-                } finally {
-                    setLoading(false);
-                }
+            const newPalace = {
+              id: Date.now(),
+              name: palaceName,
+              category,
+              location: fullLocation,
+              items: itemList,
+              createdAt: new Date().toISOString(),
+              lastReviewed: null,
+              reviewCount: 0,
+              aiStory: aiStory || null
             };
 
+            const newPalaces = [...palaces, newPalace];
+            const newUsage = {
+              ...locationUsage,
+              [fullLocation]: (locationUsage[fullLocation] || 0) + 1
+            };
+
+            setPalaces(newPalaces);
+            setLocationUsage(newUsage);
+            saveData(newPalaces, newUsage);
+
+            setPalaceName('');
+            setItems('');
+            setAiStory('');
+            alert(`✨ "${palaceName}" 궁전이 생성되었습니다!`);
+          };
+
+          const deletePalace = (id) => {
+            const palace = palaces.find(p => p.id === id);
+            if (!palace) return;
+
+            if (window.confirm(`"${palace.name}" 궁전을 삭제하시겠습니까?`)) {
+              const newPalaces = palaces.filter(p => p.id !== id);
+              const newUsage = {
+                ...locationUsage,
+                [palace.location]: Math.max(0, (locationUsage[palace.location] || 1) - 1)
+              };
+
+              setPalaces(newPalaces);
+              setLocationUsage(newUsage);
+              saveData(newPalaces, newUsage);
+            }
+          };
+
+          const addCustomLocation = () => {
+            if (!newLocation.trim()) {
+              alert('장소 이름을 입력해주세요!');
+              return;
+            }
+
+            if (locations.includes(newLocation.trim())) {
+              alert('이미 존재하는 장소입니다!');
+              return;
+            }
+
+            const updatedLocations = [...locations, newLocation.trim()];
+            setLocations(updatedLocations);
+
+            const customLocations = updatedLocations.filter(loc => !DEFAULT_LOCATIONS.includes(loc));
+            localStorage.setItem('customLocations', JSON.stringify(customLocations));
+
+            setNewLocation('');
+            alert(`✅ "${newLocation.trim()}" 장소가 추가되었습니다!`);
+          };
+
+          const saveApiKey = () => {
+            if (!geminiApiKey.trim()) {
+              alert('API 키를 입력해주세요!');
+              return;
+            }
+            localStorage.setItem('geminiApiKey', geminiApiKey.trim());
+            setShowApiKeyInput(false);
+            alert('✅ API 키가 저장되었습니다!');
+          };
+
+          const callGeminiAI = async (prompt) => {
+            if (!geminiApiKey) {
+              alert('먼저 Gemini API 키를 설정해주세요!');
+              setShowApiKeyInput(true);
+              return null;
+            }
+
+            // 시도할 모델 목록 (순서대로 시도)
+            const modelsToTry = [
+              { version: 'v1', model: 'models/gemini-2.5-flash' },
+              { version: 'v1', model: 'models/gemini-2.0-flash' },
+              { version: 'v1beta', model: 'models/gemini-2.5-flash' },
+              { version: 'v1beta', model: 'models/gemini-2.0-flash' }
+            ];
+
+            for (let i = 0; i < modelsToTry.length; i++) {
+              const { version, model } = modelsToTry[i];
+              const API_URL = `https://generativelanguage.googleapis.com/${version}/${model}:generateContent?key=${geminiApiKey}`;
+
+              console.log(`시도 중 (${i + 1}/${modelsToTry.length}): ${model} (${version})`);
+
+              try {
+                const response = await fetch(API_URL, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    contents: [{
+                      parts: [{
+                        text: prompt
+                      }]
+                    }]
+                  })
+                });
+
+                if (response.ok) {
+                  const data = await response.json();
+                  console.log(`✅ 성공한 모델: ${model} (${version})`);
+                  console.log('AI 응답:', data);
+                  return data.candidates[0].content.parts[0].text;
+                }
+
+                // 404가 아닌 다른 오류는 즉시 실패 처리
+                if (response.status !== 404) {
+                  const errorData = await response.json().catch(() => ({}));
+                  console.error(`❌ ${model} 오류:`, errorData);
+                  throw new Error(`API 오류 (${response.status}): ${errorData.error?.message || '알 수 없는 오류'}`);
+                }
+
+                console.log(`⏭️ ${model} 사용 불가, 다음 모델 시도...`);
+
+              } catch (error) {
+                if (i === modelsToTry.length - 1) {
+                  // 마지막 시도도 실패
+                  console.error('모든 모델 시도 실패:', error);
+                  alert(`AI 호출 실패: ${error.message}\n\n가능한 원인:\n1. API 키가 유효하지 않음\n2. API 할당량 초과\n3. 인터넷 연결 문제\n\n해결방법:\n- API 키를 다시 발급받아 보세요\n- 잠시 후 다시 시도해보세요`);
+                  return null;
+                }
+              }
+            }
+
+            alert('사용 가능한 Gemini 모델을 찾을 수 없습니다.\nAPI 키를 확인해주세요.');
+            return null;
+          };
+
+          const fetchUnsplashImage = async (keyword) => {
+            try {
+              // Pixabay API 사용 (무료, 키워드 기반 정확한 이미지 검색)
+              const query = encodeURIComponent(keyword);
+              const imageUrl = `https://pixabay.com/api/?key=46157976-1b3c0e8ad3e9d0e2f5e1c0d3f&q=${query}&image_type=photo&per_page=5&safesearch=true&order=popular`;
+
+              const response = await fetch(imageUrl);
+              const data = await response.json();
+
+              if (data.hits && data.hits.length > 0) {
+                // 가장 관련성 높은 이미지 선택 (인기순 정렬)
+                return data.hits[0].webformatURL;
+              } else {
+                // 검색 결과 없을 때: 키워드에서 첫 단어만 사용해 재검색
+                const firstWord = keyword.split(' ')[0];
+                const fallbackUrl = `https://pixabay.com/api/?key=46157976-1b3c0e8ad3e9d0e2f5e1c0d3f&q=${encodeURIComponent(firstWord)}&image_type=photo&per_page=3&order=popular`;
+
+                const fallbackResponse = await fetch(fallbackUrl);
+                const fallbackData = await fallbackResponse.json();
+
+                if (fallbackData.hits && fallbackData.hits.length > 0) {
+                  return fallbackData.hits[0].webformatURL;
+                }
+
+                return `https://picsum.photos/400/300?random=${Date.now()}`;
+              }
+            } catch (error) {
+              console.error('이미지 가져오기 실패:', error);
+              return `https://picsum.photos/400/300?random=${Date.now()}`;
+            }
+          };
+
+          const autoMatchWithAI = async () => {
+            if (!palaceName || !items) {
+              alert('궁전 이름과 기억할 항목을 먼저 입력해주세요!');
+              return;
+            }
+
+            setAiLoading(true);
+
+            const itemList = items.split(',').map(item => item.trim()).filter(item => item);
+
+            if (itemList.length === 0) {
+              alert('기억할 항목을 입력해주세요!');
+              setAiLoading(false);
+              return;
+            }
+
+            const availableLocations = JSON.stringify(
+              DEFAULT_LOCATIONS.reduce((acc, loc) => {
+                acc[loc] = SUB_LOCATIONS[loc];
+                return acc;
+              }, {})
+            );
+
+            const prompt = `당신은 기억의 궁전(Memory Palace) 전문가입니다.
+주제: "${palaceName}"
+기억할 항목들: ${itemList.join(', ')}
+
+다음 장소들 중 가장 적합한 장소를 선택하고, 각 항목을 세부 장소에 순서대로 배치하여 생생한 이미지와 스토리를 만들어주세요:
+${availableLocations}
+
+응답은 반드시 다음 JSON 형식으로만 작성해주세요:
+{
+  "location": "추천 메인 장소",
+  "category": "역사/과학/수학/언어/업무/기타 중 하나",
+  "overallStory": "전체적인 스토리 (1-2문장)",
+  "items": [
+    {
+      "name": "항목 이름",
+      "subLocation": "세부 장소",
+      "visualImage": "이 항목을 표현하는 생생한 시각적 이미지 묘사 (1문장)",
+      "story": "이 위치에서 이 항목을 기억하는 스토리 (1-2문장)",
+      "imageKeyword": "해당 항목의 핵심 개념을 구체적으로 표현하는 영어 키워드 2-3개 (공백으로 구분)"
+    }
+  ]
+}
+
+중요:
+1. imageKeyword는 반드시 해당 항목의 실제 내용과 직접 관련된 영어 단어여야 합니다.
+2. 예시: "광합성" → "photosynthesis chloroplast", "프랑스 혁명" → "french revolution bastille", "파이썬" → "python programming code"
+3. 추상적이거나 일반적인 단어 대신, 검색했을 때 정확한 이미지가 나올 수 있는 구체적인 용어를 사용하세요.
+4. 각 항목은 순서대로 다른 세부 장소에 배치하고, 생생하고 기억하기 쉬운 이미지를 만드세요.
+JSON만 출력하고 다른 설명은 추가하지 마세요.`;
+
+            const result = await callGeminiAI(prompt);
+
+            if (result) {
+              try {
+                const jsonMatch = result.match(/\{[\s\S]*\}/);
+                if (!jsonMatch) {
+                  throw new Error('JSON 형식을 찾을 수 없습니다.');
+                }
+
+                const aiResponse = JSON.parse(jsonMatch[0]);
+
+                // 각 항목에 이미지 URL 추가
+                if (aiResponse.items && aiResponse.items.length > 0) {
+                  for (let item of aiResponse.items) {
+                    const keyword = item.imageKeyword || item.name;
+                    item.imageUrl = await fetchUnsplashImage(keyword);
+                  }
+
+                  setSelectedLocation(aiResponse.location);
+                  setSelectedSubLocation(aiResponse.items[0].subLocation);
+                  setCategory(aiResponse.category);
+                  setAiStory(JSON.stringify(aiResponse));
+
+                  // 요약 메시지
+                  let summary = `🤖 AI 추천:\n\n`;
+                  summary += `장소: ${aiResponse.location}\n`;
+                  summary += `전체 스토리: ${aiResponse.overallStory}\n\n`;
+                  summary += `각 항목 배치:\n`;
+                  aiResponse.items.forEach((item, idx) => {
+                    summary += `${idx + 1}. ${item.name} → ${item.subLocation}\n`;
+                  });
+                  summary += `\n✅ 이미지와 함께 자동으로 적용되었습니다!`;
+
+                  alert(summary);
+                } else {
+                  throw new Error('항목 정보가 없습니다.');
+                }
+              } catch (error) {
+                console.error('파싱 오류:', error);
+                alert(`AI 응답 파싱 실패: ${error.message}\n\n원본 응답:\n${result}`);
+              }
+            }
+
+            setAiLoading(false);
+          };
+
+          const startQuiz = (palace) => {
+            setCurrentQuiz(palace);
+            setRevealedItems([]);
+            setQuizMode(true);
+          };
+
+          const toggleRevealItem = (index) => {
+            setRevealedItems(prev =>
+              prev.includes(index)
+                ? prev.filter(i => i !== index)
+                : [...prev, index]
+            );
+          };
+
+          const completeQuiz = () => {
+            if (!currentQuiz) return;
+
+            const updatedPalaces = palaces.map(p =>
+              p.id === currentQuiz.id
+                ? { ...p, lastReviewed: new Date().toISOString(), reviewCount: (p.reviewCount || 0) + 1 }
+                : p
+            );
+
+            setPalaces(updatedPalaces);
+            localStorage.setItem('memoryPalaces', JSON.stringify(updatedPalaces));
+
+            setQuizMode(false);
+            setCurrentQuiz(null);
+            setRevealedItems([]);
+          };
+
+          const getLocationIcon = (location) => {
+            const mainLocation = location.includes(' > ') ? location.split(' > ')[0] : location;
+            const Icon = LOCATION_ICONS[mainLocation] || Building2;
+            return React.createElement(Icon, { className: "w-5 h-5" });
+          };
+
+          const getSortedPalaces = () => {
+            let filtered = palaces;
+
+            if (filterCategory !== 'all') {
+              filtered = palaces.filter(p => p.category === filterCategory);
+            }
+
+            return [...filtered].sort((a, b) => {
+              if (sortBy === 'date') {
+                return new Date(b.createdAt) - new Date(a.createdAt);
+              } else if (sortBy === 'name') {
+                return a.name.localeCompare(b.name, 'ko');
+              } else if (sortBy === 'review') {
+                return (b.reviewCount || 0) - (a.reviewCount || 0);
+              }
+              return 0;
+            });
+          };
+
+          const formatDate = (dateString) => {
+            if (!dateString) return '없음';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ko-KR');
+          };
+
+          if (quizMode && currentQuiz) {
             return (
-                <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
-                        <div className="text-center mb-8">
-                            <h1 className="text-4xl font-bold text-purple-900 mb-2">🏛️ 기억의 궁전</h1>
-                            <p className="text-gray-600">장소와 연결하여 기억력을 높이세요</p>
+              <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
+                <div className="max-w-2xl mx-auto">
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <div className="text-center mb-6">
+                      <h2 className="text-3xl font-bold text-purple-900 mb-2">🧠 기억 테스트</h2>
+                      <p className="text-gray-600">{currentQuiz.name}</p>
+                      <div className="flex items-center justify-center gap-3 text-sm text-gray-600 mt-2">
+                        <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded">{currentQuiz.category}</span>
+                        <span className="flex items-center gap-1">
+                          {getLocationIcon(currentQuiz.location)}
+                          {currentQuiz.location}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="bg-purple-50 border-2 border-purple-200 rounded-lg p-4 mb-6">
+                      <div className="flex gap-4 mb-4">
+                        <div className="flex-shrink-0">
+                          <img
+                            src={LOCATION_IMAGES[currentQuiz.location.split(' > ')[0]]}
+                            alt={currentQuiz.location}
+                            className="w-32 h-32 rounded-lg shadow-md"
+                          />
                         </div>
-
-                        <div className="flex gap-2 mb-6">
-                            <button
-                                onClick={() => setIsLogin(true)}
-                                className={`flex-1 py-2 px-4 rounded-lg font-semibold transition ${
-                                    isLogin
-                                        ? 'bg-purple-600 text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
-                            >
-                                로그인
-                            </button>
-                            <button
-                                onClick={() => setIsLogin(false)}
-                                className={`flex-1 py-2 px-4 rounded-lg font-semibold transition ${
-                                    !isLogin
-                                        ? 'bg-purple-600 text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
-                            >
-                                회원가입
-                            </button>
-                        </div>
-
-                        <form onSubmit={handleAuth} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    이메일
-                                </label>
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="your@email.com"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    비밀번호
-                                </label>
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="••••••••"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                    required
-                                />
-                            </div>
-
-                            {message && (
-                                <div
-                                    className={`p-3 rounded-lg text-sm ${
-                                        message.includes('완료')
-                                            ? 'bg-green-100 text-green-800'
-                                            : 'bg-red-100 text-red-800'
-                                    }`}
-                                >
-                                    {message}
+                        <div className="flex-1">
+                          <p className="text-purple-900 font-semibold mb-2">
+                            💭 이 장소를 상상하며 기억해보세요
+                          </p>
+                          <p className="text-gray-600 text-sm mb-2">
+                            각 항목을 클릭하여 답을 확인할 수 있습니다
+                          </p>
+                          {currentQuiz.aiStory && (() => {
+                            try {
+                              const aiData = JSON.parse(currentQuiz.aiStory);
+                              return (
+                                <div className="mt-3 p-2 bg-white rounded border border-purple-200">
+                                  <p className="text-xs text-purple-800 font-semibold mb-1">🤖 전체 스토리:</p>
+                                  <p className="text-xs text-gray-700 mb-2">{aiData.overallStory}</p>
+                                  <p className="text-xs text-purple-800 font-semibold mb-1">📍 항목별 위치 힌트:</p>
+                                  <div className="space-y-1">
+                                    {aiData.items && aiData.items.map((item, idx) => (
+                                      <p key={idx} className="text-xs text-gray-600">
+                                        {idx + 1}. {item.subLocation}
+                                      </p>
+                                    ))}
+                                  </div>
                                 </div>
-                            )}
-
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {loading ? '처리 중...' : isLogin ? '로그인' : '회원가입'}
-                            </button>
-                        </form>
+                              );
+                            } catch (e) {
+                              return (
+                                <div className="mt-3 p-2 bg-white rounded border border-purple-200">
+                                  <p className="text-xs text-purple-800 font-semibold mb-1">🤖 AI 추천 스토리:</p>
+                                  <p className="text-xs text-gray-700">{currentQuiz.aiStory}</p>
+                                </div>
+                              );
+                            }
+                          })()}
+                        </div>
+                      </div>
                     </div>
-                </div>
-            );
-        }
 
-        // memory-palace.html의 MemoryPalaceApp 컴포넌트를 여기에 복사
-        // (파일이 너무 길어지므로 별도 파일로 분리 추천)
-        function MemoryPalaceApp({ supabase, session }) {
-            // 기존 memory-palace.html의 로직을 여기에 통합
-            // localStorage 대신 supabase 사용
+                    <div className="space-y-3 mb-6">
+                      {currentQuiz.items.map((item, idx) => {
+                        let aiItemData = null;
+                        if (currentQuiz.aiStory) {
+                          try {
+                            const aiData = JSON.parse(currentQuiz.aiStory);
+                            if (aiData.items && aiData.items[idx]) {
+                              aiItemData = aiData.items[idx];
+                            }
+                          } catch (e) {}
+                        }
 
-            const [user, setUser] = useState(session?.user || null);
-
-            return (
-                <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
-                    <div className="max-w-4xl mx-auto">
-                        <div className="flex items-center justify-between mb-8">
-                            <div className="text-center flex-1">
-                                <h1 className="text-4xl font-bold text-purple-900 mb-2">🏛️ 기억의 궁전</h1>
-                                <p className="text-gray-600">장소와 연결하여 기억력을 높이세요</p>
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() => toggleRevealItem(idx)}
+                            className="bg-white border-2 border-gray-300 rounded-lg p-4 cursor-pointer hover:border-purple-400 transition"
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-semibold text-gray-700">항목 {idx + 1}</span>
+                              {revealedItems.includes(idx) ? (
+                                <Eye className="w-5 h-5 text-purple-600" />
+                              ) : (
+                                <EyeOff className="w-5 h-5 text-gray-400" />
+                              )}
                             </div>
-                            {supabase && user && (
-                                <button
-                                    onClick={async () => {
-                                        await supabase.auth.signOut();
-                                    }}
-                                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm"
-                                >
-                                    로그아웃
-                                </button>
+                            {revealedItems.includes(idx) && (
+                              <div>
+                                <p className="text-lg text-purple-900 font-semibold mb-2">{item}</p>
+                                {aiItemData && (
+                                  <div className="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                                    <p className="text-xs text-purple-800 font-semibold mb-1">📍 위치: {aiItemData.subLocation}</p>
+                                    {aiItemData.imageUrl && (
+                                      <img
+                                        src={aiItemData.imageUrl}
+                                        alt={aiItemData.name}
+                                        className="w-full h-40 object-cover rounded-lg my-2"
+                                        onError={(e) => e.target.style.display = 'none'}
+                                      />
+                                    )}
+                                    <p className="text-sm text-gray-700 mb-2">🖼️ {aiItemData.visualImage}</p>
+                                    <p className="text-sm text-gray-800">{aiItemData.story}</p>
+                                  </div>
+                                )}
+                              </div>
                             )}
-                        </div>
-
-                        <div className="bg-white rounded-lg shadow-md p-8 text-center">
-                            <p className="text-lg text-gray-700">
-                                {user ? `환영합니다, ${user.email}님!` : '로컬 모드로 실행 중입니다.'}
-                            </p>
-                            <p className="text-sm text-gray-500 mt-2">
-                                기억의 궁전 앱이 곧 여기에 표시됩니다.
-                            </p>
-                        </div>
+                          </div>
+                        );
+                      })}
                     </div>
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => {
+                          setQuizMode(false);
+                          setCurrentQuiz(null);
+                          setRevealedItems([]);
+                        }}
+                        className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition"
+                      >
+                        취소
+                      </button>
+                      <button
+                        onClick={completeQuiz}
+                        className="flex-1 bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition"
+                      >
+                        복습 완료
+                      </button>
+                    </div>
+                  </div>
                 </div>
+              </div>
             );
+          }
+
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
+              <div className="max-w-4xl mx-auto">
+                <div className="text-center mb-8">
+                  <h1 className="text-4xl font-bold text-purple-900 mb-2">🏛️ 기억의 궁전</h1>
+                  <p className="text-gray-600">장소와 연결하여 기억력을 높이세요</p>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-md mb-6 p-2 flex gap-2">
+                  <button onClick={() => setActiveTab('create')} className={`flex-1 py-3 px-4 rounded-lg font-semibold transition ${activeTab === 'create' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                    ✨ 새 궁전 만들기
+                  </button>
+                  <button onClick={() => setActiveTab('collection')} className={`flex-1 py-3 px-4 rounded-lg font-semibold transition relative ${activeTab === 'collection' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                    📚 내 궁전 보관함
+                    {palaces.length > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">{palaces.length}</span>
+                    )}
+                  </button>
+                  <button onClick={() => setActiveTab('locations')} className={`flex-1 py-3 px-4 rounded-lg font-semibold transition ${activeTab === 'locations' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                    📍 장소 관리
+                  </button>
+                </div>
+
+                {activeTab === 'create' && (
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-2xl font-bold text-purple-900">새 궁전 만들기</h2>
+                      <button
+                        onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+                        className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 transition"
+                      >
+                        {geminiApiKey ? '⚙️ API 설정' : '🔑 API 키 설정'}
+                      </button>
+                    </div>
+
+                    {showApiKeyInput && (
+                      <div className="mb-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                        <h3 className="text-sm font-semibold text-blue-900 mb-2">Gemini API 키 설정</h3>
+                        <p className="text-xs text-blue-700 mb-3">
+                          무료 API 키는 <a href="https://makersuite.google.com/app/apikey" target="_blank" className="underline font-semibold">여기서 발급</a>받을 수 있습니다.
+                        </p>
+                        <div className="flex gap-2">
+                          <input
+                            type="password"
+                            value={geminiApiKey}
+                            onChange={(e) => setGeminiApiKey(e.target.value)}
+                            placeholder="API 키를 입력하세요"
+                            className="flex-1 px-3 py-2 border border-blue-300 rounded-lg text-sm"
+                          />
+                          <button
+                            onClick={saveApiKey}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
+                          >
+                            저장
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">궁전 이름</label>
+                        <input type="text" value={palaceName} onChange={(e) => setPalaceName(e.target.value)} placeholder="예: 영어 단어 암기" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">카테고리</label>
+                        <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                          <option value="역사">📜 역사</option>
+                          <option value="과학">🔬 과학</option>
+                          <option value="수학">🔢 수학</option>
+                          <option value="언어">💬 언어</option>
+                          <option value="업무">💼 업무</option>
+                          <option value="기타">📌 기타</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          장소 선택 {CATEGORY_LOCATIONS[category] && <span className="text-purple-600 text-xs">(추천: {CATEGORY_LOCATIONS[category].join(', ')})</span>}
+                        </label>
+                        <select value={selectedLocation} onChange={(e) => handleLocationChange(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                          <option value="">장소를 선택하세요</option>
+                          {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+                        </select>
+                      </div>
+                      {selectedLocation && SUB_LOCATIONS[selectedLocation] && (
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            세부 장소 선택 <span className="text-purple-600 text-xs">(더 구체적인 위치를 선택하면 기억이 더 선명해집니다)</span>
+                          </label>
+                          <select value={selectedSubLocation} onChange={(e) => handleSubLocationChange(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            {SUB_LOCATIONS[selectedLocation].map(subLoc => <option key={subLoc} value={subLoc}>{subLoc}</option>)}
+                          </select>
+                        </div>
+                      )}
+                      {showWarning && selectedLocation && (
+                        <div className="p-3 bg-yellow-50 border border-yellow-300 rounded-lg flex items-center gap-2 text-yellow-800">
+                          <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                          <span className="text-sm">
+                            {selectedSubLocation
+                              ? `"${selectedLocation} > ${selectedSubLocation}"는 이미 ${locationUsage[`${selectedLocation} > ${selectedSubLocation}`]}번 사용되었습니다.`
+                              : `"${selectedLocation}"는 이미 ${locationUsage[selectedLocation]}번 사용되었습니다.`
+                            } 다른 장소를 선택하면 혼란을 줄일 수 있습니다.
+                          </span>
+                        </div>
+                      )}
+                      {aiStory && selectedLocation && (() => {
+                        try {
+                          const aiData = JSON.parse(aiStory);
+                          return (
+                            <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-300 rounded-lg">
+                              <div className="flex gap-4 mb-4">
+                                <div className="flex-shrink-0">
+                                  <img
+                                    src={LOCATION_IMAGES[selectedLocation.split(' > ')[0]]}
+                                    alt={selectedLocation}
+                                    className="w-32 h-32 rounded-lg shadow-md"
+                                  />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-sm font-semibold text-blue-900 mb-2">🤖 AI 추천 장소: {aiData.location}</p>
+                                  <p className="text-sm text-gray-700 leading-relaxed mb-2">{aiData.overallStory}</p>
+                                </div>
+                              </div>
+                              <div className="border-t border-blue-200 pt-3">
+                                <p className="text-xs font-semibold text-blue-900 mb-3">📍 각 항목 배치:</p>
+                                <div className="space-y-2">
+                                  {aiData.items && aiData.items.map((item, idx) => (
+                                    <div key={idx} className="bg-white rounded-lg p-3 border border-blue-200">
+                                      <div className="flex items-start gap-3">
+                                        <div className="flex-shrink-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                                          {idx + 1}
+                                        </div>
+                                        <div className="flex-1">
+                                          <p className="font-semibold text-gray-800 text-sm mb-1">{item.name} <span className="text-xs text-purple-600">→ {item.subLocation}</span></p>
+                                          {item.imageUrl && (
+                                            <img
+                                              src={item.imageUrl}
+                                              alt={item.name}
+                                              className="w-full h-32 object-cover rounded-lg mb-2"
+                                              onError={(e) => e.target.style.display = 'none'}
+                                            />
+                                          )}
+                                          <p className="text-xs text-gray-600 mb-1">🖼️ {item.visualImage}</p>
+                                          <p className="text-xs text-gray-700">{item.story}</p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        } catch (e) {
+                          return (
+                            <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-300 rounded-lg">
+                              <p className="text-sm text-gray-700">{aiStory}</p>
+                            </div>
+                          );
+                        }
+                      })()}
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">기억할 항목 (쉼표로 구분)</label>
+                        <textarea value={items} onChange={(e) => setItems(e.target.value)} placeholder="예: 광합성, 엽록소, 이산화탄소, 산소, 포도당, 햇빛" rows="4" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                        <div className="flex items-center justify-between mt-1">
+                          <p className="text-xs text-gray-500">{items ? `${items.split(',').filter(i => i.trim()).length}개 항목` : '0개 항목'}</p>
+                          <button
+                            onClick={autoMatchWithAI}
+                            disabled={aiLoading || !palaceName || !items}
+                            className="text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-lg hover:from-blue-600 hover:to-purple-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                          >
+                            {aiLoading ? '🤖 AI 분석 중...' : '✨ AI 자동 매칭'}
+                          </button>
+                        </div>
+                      </div>
+                      <button onClick={createPalace} className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition flex items-center justify-center gap-2">
+                        <Save className="w-5 h-5" />궁전 만들기
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'collection' && (
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-2xl font-bold text-purple-900">내 궁전 보관함 ({getSortedPalaces().length}개)</h2>
+                      <div className="flex gap-2">
+                        <select
+                          value={filterCategory}
+                          onChange={(e) => setFilterCategory(e.target.value)}
+                          className="px-3 py-1 border border-gray-300 rounded text-sm"
+                        >
+                          <option value="all">전체</option>
+                          <option value="역사">역사</option>
+                          <option value="과학">과학</option>
+                          <option value="수학">수학</option>
+                          <option value="언어">언어</option>
+                          <option value="업무">업무</option>
+                          <option value="기타">기타</option>
+                        </select>
+                        <select
+                          value={sortBy}
+                          onChange={(e) => setSortBy(e.target.value)}
+                          className="px-3 py-1 border border-gray-300 rounded text-sm"
+                        >
+                          <option value="date">최신순</option>
+                          <option value="name">이름순</option>
+                          <option value="review">복습순</option>
+                        </select>
+                      </div>
+                    </div>
+                    {getSortedPalaces().length === 0 ? (
+                      <div className="text-center py-12 text-gray-500">
+                        <Building2 className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                        <p>아직 만든 궁전이 없습니다.</p>
+                        <p className="text-sm">새 궁전을 만들어보세요!</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {getSortedPalaces().map(palace => (
+                          <div key={palace.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <h3 className="text-lg font-bold text-gray-800">{palace.name}</h3>
+                                <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 mt-1">
+                                  <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">{palace.category}</span>
+                                  <span className="flex items-center gap-1">
+                                    {getLocationIcon(palace.location)}
+                                    {palace.location}
+                                  </span>
+                                  <span className="text-xs text-gray-500">{palace.items.length}개 항목</span>
+                                  {palace.reviewCount > 0 && (
+                                    <span className="text-xs text-green-600 font-semibold">📝 {palace.reviewCount}회 복습</span>
+                                  )}
+                                </div>
+                                {palace.lastReviewed && (
+                                  <p className="text-xs text-gray-500 mt-1">마지막 복습: {formatDate(palace.lastReviewed)}</p>
+                                )}
+                              </div>
+                              <div className="flex gap-2 ml-3">
+                                <button
+                                  onClick={() => startQuiz(palace)}
+                                  className="bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm hover:bg-purple-200 transition whitespace-nowrap"
+                                >
+                                  🧠 테스트
+                                </button>
+                                <button
+                                  onClick={() => deletePalace(palace.id)}
+                                  className="text-red-500 hover:text-red-700 transition p-1"
+                                >
+                                  <Trash2 className="w-5 h-5" />
+                                </button>
+                              </div>
+                            </div>
+                            {palace.aiStory && (() => {
+                              try {
+                                const aiData = JSON.parse(palace.aiStory);
+                                return (
+                                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-3 mb-3">
+                                    <div className="flex gap-3 mb-3">
+                                      <div className="flex-shrink-0">
+                                        <img
+                                          src={LOCATION_IMAGES[palace.location.split(' > ')[0]]}
+                                          alt={palace.location}
+                                          className="w-20 h-20 rounded-lg shadow-md"
+                                        />
+                                      </div>
+                                      <div className="flex-1">
+                                        <p className="text-xs font-semibold text-blue-900 mb-1">🤖 AI 추천 스토리:</p>
+                                        <p className="text-xs text-gray-700 leading-relaxed">{aiData.overallStory}</p>
+                                      </div>
+                                    </div>
+                                    <div className="border-t border-blue-200 pt-2 space-y-2">
+                                      {aiData.items && aiData.items.map((item, idx) => (
+                                        <div key={idx} className="bg-white rounded p-2 border border-blue-100">
+                                          <div className="flex items-start gap-2">
+                                            <span className="flex-shrink-0 w-5 h-5 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold">{idx + 1}</span>
+                                            <div className="flex-1 min-w-0">
+                                              <p className="text-xs font-semibold text-gray-800 truncate">{item.name} <span className="text-purple-600">→ {item.subLocation}</span></p>
+                                              {item.imageUrl && (
+                                                <img
+                                                  src={item.imageUrl}
+                                                  alt={item.name}
+                                                  className="w-full h-20 object-cover rounded my-1"
+                                                  onError={(e) => e.target.style.display = 'none'}
+                                                />
+                                              )}
+                                              <p className="text-xs text-gray-600 line-clamp-2">{item.visualImage}</p>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              } catch (e) {
+                                return (
+                                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-3 mb-3">
+                                    <div className="flex gap-3">
+                                      <div className="flex-shrink-0">
+                                        <img
+                                          src={LOCATION_IMAGES[palace.location.split(' > ')[0]]}
+                                          alt={palace.location}
+                                          className="w-20 h-20 rounded-lg shadow-md"
+                                        />
+                                      </div>
+                                      <div className="flex-1">
+                                        <p className="text-xs font-semibold text-blue-900 mb-1">🤖 AI 추천 스토리:</p>
+                                        <p className="text-xs text-gray-700 leading-relaxed">{palace.aiStory}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            })()}
+                            <div className="bg-gray-50 rounded p-3">
+                              <p className="text-sm text-gray-600 font-semibold mb-2">기억할 항목:</p>
+                              <div className="flex flex-wrap gap-2">
+                                {palace.items.map((item, idx) => (
+                                  <span key={idx} className="bg-white border border-gray-300 px-2 py-1 rounded text-sm text-gray-700">
+                                    {idx + 1}. {item}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === 'locations' && (
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <h2 className="text-2xl font-bold text-purple-900 mb-4">장소 관리</h2>
+
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3">🏛️ 기본 장소 (8개) - 클릭하면 세부 장소 표시</h3>
+                      <div className="space-y-3">
+                        {DEFAULT_LOCATIONS.map(loc => (
+                          <div key={loc} className="border-2 border-purple-200 rounded-lg overflow-hidden">
+                            <div
+                              onClick={() => setExpandedLocation(expandedLocation === loc ? null : loc)}
+                              className="bg-purple-50 p-4 flex items-center gap-3 cursor-pointer hover:bg-purple-100 transition"
+                            >
+                              {getLocationIcon(loc)}
+                              <div className="flex-1">
+                                <p className="font-semibold text-gray-800">{loc}</p>
+                                <p className="text-xs text-gray-600">
+                                  세부 장소 {SUB_LOCATIONS[loc] ? SUB_LOCATIONS[loc].length : 0}개
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm text-purple-700 font-semibold">
+                                  {expandedLocation === loc ? '▼' : '▶'}
+                                </p>
+                              </div>
+                            </div>
+                            {expandedLocation === loc && SUB_LOCATIONS[loc] && (
+                              <div className="bg-white p-4 border-t-2 border-purple-100">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                  {SUB_LOCATIONS[loc].map(subLoc => {
+                                    const fullLocation = `${loc} > ${subLoc}`;
+                                    const usage = locationUsage[fullLocation] || 0;
+                                    return (
+                                      <div key={subLoc} className="bg-purple-50 border border-purple-200 rounded p-2">
+                                        <p className="text-sm font-semibold text-gray-800">{subLoc}</p>
+                                        <p className="text-xs text-gray-600">{usage}번 사용</p>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-6">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3">➕ 커스텀 장소 추가</h3>
+                      <div className="flex gap-2 mb-4">
+                        <input
+                          type="text"
+                          value={newLocation}
+                          onChange={(e) => setNewLocation(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && addCustomLocation()}
+                          placeholder="예: 우리집, 회사, 헬스장"
+                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        />
+                        <button
+                          onClick={addCustomLocation}
+                          className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition flex items-center gap-2"
+                        >
+                          <Plus className="w-5 h-5" />
+                          추가
+                        </button>
+                      </div>
+
+                      {locations.filter(loc => !DEFAULT_LOCATIONS.includes(loc)).length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-700 mb-2">내가 추가한 장소:</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {locations.filter(loc => !DEFAULT_LOCATIONS.includes(loc)).map(loc => (
+                              <div key={loc} className="bg-blue-50 border-2 border-blue-200 rounded-lg p-3 flex items-center gap-2">
+                                <Building2 className="w-5 h-5 text-blue-600" />
+                                <div className="flex-1">
+                                  <p className="font-semibold text-gray-800">{loc}</p>
+                                  <p className="text-xs text-gray-600">{locationUsage[loc] || 0}번 사용</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-900">
+                        <span className="font-semibold">💡 팁:</span> 자주 방문하는 장소나 잘 아는 장소를 추가하면 기억에 더 효과적입니다!
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
         }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        root.render(<MemoryPalaceApp />);
     </script>
 </body>
 </html>
