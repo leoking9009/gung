@@ -3,7 +3,11 @@
     "allow": [
       "Bash(git init:*)",
       "Bash(git remote add:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd Memory Palace app with AI-powered location matching\n\nFeatures:\n- 8 default locations with sub-locations\n- Gemini AI integration for automatic item-to-location matching\n- Each memory item gets unique sub-location, visual image, and story\n- Quiz mode with visual aids and AI-generated stories\n- Local storage for persistent data\n- Location usage tracking to prevent confusion\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git config:*)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
