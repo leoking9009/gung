@@ -311,28 +311,87 @@
             return null;
           };
 
-          const fetchUnsplashImage = async (keyword) => {
+          // 한국어 장소를 영어로 번역
+          const translateLocationToEnglish = (koreanLocation) => {
+            const locationMap = {
+              '현관': 'entrance hallway',
+              '거실': 'living room',
+              '주방': 'kitchen',
+              '안방': 'bedroom',
+              '작은방': 'small room',
+              '화장실': 'bathroom',
+              '베란다': 'balcony',
+              '교실': 'classroom',
+              '복도': 'school corridor',
+              '운동장': 'playground field',
+              '도서실': 'library room',
+              '급식실': 'cafeteria',
+              '강당': 'auditorium',
+              '과학실': 'science lab',
+              '벤치': 'park bench',
+              '분수대': 'fountain',
+              '놀이터': 'playground',
+              '산책로': 'walking path',
+              '매점': 'kiosk store',
+              '정자': 'pavilion',
+              '화단': 'flower garden',
+              '입구': 'entrance',
+              '푸드코트': 'food court',
+              '의류매장': 'clothing store',
+              '전자제품매장': 'electronics store',
+              '서점': 'bookstore',
+              '화장품매장': 'cosmetics store',
+              '주차장': 'parking lot',
+              '입구홀': 'entrance hall',
+              '전시실1': 'exhibition hall',
+              '전시실2': 'gallery room',
+              '뮤지엄샵': 'museum shop',
+              '카페': 'cafe',
+              '야외전시장': 'outdoor exhibition',
+              '열람실': 'reading room',
+              '서가': 'bookshelf area',
+              '대출데스크': 'checkout desk',
+              '스터디룸': 'study room',
+              '휴게실': 'lounge',
+              '회의실': 'meeting room',
+              '개인좌석': 'office desk',
+              '복사실': 'copy room',
+              '탕비실': 'pantry',
+              '테라스': 'terrace',
+              '개찰구': 'ticket gate',
+              '플랫폼': 'platform',
+              '에스컬레이터': 'escalator',
+              '대합실': 'waiting room',
+              '편의점': 'convenience store',
+              '출구': 'exit'
+            };
+
+            return locationMap[koreanLocation] || koreanLocation;
+          };
+
+          const fetchUnsplashImage = async (locationName) => {
             try {
-              // Pixabay API 사용 (무료, 키워드 기반 정확한 이미지 검색)
-              const query = encodeURIComponent(keyword);
-              const imageUrl = `https://pixabay.com/api/?key=46157976-1b3c0e8ad3e9d0e2f5e1c0d3f&q=${query}&image_type=photo&per_page=5&safesearch=true&order=popular`;
+              // 한국어 장소를 영어로 번역
+              const englishLocation = translateLocationToEnglish(locationName);
+
+              // Pixabay API 사용 - 일러스트레이션 스타일로 장소 이미지 검색
+              const query = encodeURIComponent(englishLocation + ' interior');
+              const imageUrl = `https://pixabay.com/api/?key=46157976-1b3c0e8ad3e9d0e2f5e1c0d3f&q=${query}&image_type=illustration&per_page=5&safesearch=true&order=popular`;
 
               const response = await fetch(imageUrl);
               const data = await response.json();
 
               if (data.hits && data.hits.length > 0) {
-                // 가장 관련성 높은 이미지 선택 (인기순 정렬)
                 return data.hits[0].webformatURL;
               } else {
-                // 검색 결과 없을 때: 키워드에서 첫 단어만 사용해 재검색
-                const firstWord = keyword.split(' ')[0];
-                const fallbackUrl = `https://pixabay.com/api/?key=46157976-1b3c0e8ad3e9d0e2f5e1c0d3f&q=${encodeURIComponent(firstWord)}&image_type=photo&per_page=3&order=popular`;
+                // illustration 결과 없으면 photo로 재시도
+                const photoUrl = `https://pixabay.com/api/?key=46157976-1b3c0e8ad3e9d0e2f5e1c0d3f&q=${query}&image_type=photo&per_page=5&order=popular`;
 
-                const fallbackResponse = await fetch(fallbackUrl);
-                const fallbackData = await fallbackResponse.json();
+                const photoResponse = await fetch(photoUrl);
+                const photoData = await photoResponse.json();
 
-                if (fallbackData.hits && fallbackData.hits.length > 0) {
-                  return fallbackData.hits[0].webformatURL;
+                if (photoData.hits && photoData.hits.length > 0) {
+                  return photoData.hits[0].webformatURL;
                 }
 
                 return `https://picsum.photos/400/300?random=${Date.now()}`;
@@ -383,17 +442,16 @@ ${availableLocations}
       "name": "항목 이름",
       "subLocation": "세부 장소",
       "visualImage": "이 항목을 표현하는 생생한 시각적 이미지 묘사 (1문장)",
-      "story": "이 위치에서 이 항목을 기억하는 스토리 (1-2문장)",
-      "imageKeyword": "해당 항목의 핵심 개념을 구체적으로 표현하는 영어 키워드 2-3개 (공백으로 구분)"
+      "story": "이 위치에서 이 항목을 기억하는 스토리 (1-2문장)"
     }
   ]
 }
 
 중요:
-1. imageKeyword는 반드시 해당 항목의 실제 내용과 직접 관련된 영어 단어여야 합니다.
-2. 예시: "광합성" → "photosynthesis chloroplast", "프랑스 혁명" → "french revolution bastille", "파이썬" → "python programming code"
-3. 추상적이거나 일반적인 단어 대신, 검색했을 때 정확한 이미지가 나올 수 있는 구체적인 용어를 사용하세요.
-4. 각 항목은 순서대로 다른 세부 장소에 배치하고, 생생하고 기억하기 쉬운 이미지를 만드세요.
+1. 각 항목은 순서대로 다른 세부 장소에 배치하세요.
+2. visualImage는 해당 장소(subLocation)에서 이 항목을 시각화하는 구체적인 장면을 묘사하세요.
+3. story는 해당 장소와 항목을 연결하는 기억하기 쉬운 이야기를 만드세요.
+4. 생생하고 독특한 이미지를 만들어 기억력을 높이세요.
 JSON만 출력하고 다른 설명은 추가하지 마세요.`;
 
             const result = await callGeminiAI(prompt);
@@ -407,11 +465,11 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
 
                 const aiResponse = JSON.parse(jsonMatch[0]);
 
-                // 각 항목에 이미지 URL 추가
+                // 각 항목에 이미지 URL 추가 (장소 기반)
                 if (aiResponse.items && aiResponse.items.length > 0) {
                   for (let item of aiResponse.items) {
-                    const keyword = item.imageKeyword || item.name;
-                    item.imageUrl = await fetchUnsplashImage(keyword);
+                    // 세부 장소의 이미지를 가져옴
+                    item.imageUrl = await fetchUnsplashImage(item.subLocation);
                   }
 
                   setSelectedLocation(aiResponse.location);
