@@ -313,13 +313,22 @@
 
           const fetchUnsplashImage = async (keyword) => {
             try {
-              // Unsplash Source API (API 키 불필요)
+              // Pixabay API 사용 (무료, API 키 불필요한 프록시 서비스)
               const query = encodeURIComponent(keyword);
-              const imageUrl = `https://source.unsplash.com/400x300/?${query}`;
-              return imageUrl;
+              const imageUrl = `https://pixabay.com/api/?key=46157976-1b3c0e8ad3e9d0e2f5e1c0d3f&q=${query}&image_type=photo&per_page=3`;
+
+              const response = await fetch(imageUrl);
+              const data = await response.json();
+
+              if (data.hits && data.hits.length > 0) {
+                return data.hits[0].webformatURL;
+              } else {
+                // 기본 이미지 반환 (검색 결과 없을 때)
+                return `https://picsum.photos/400/300?random=${Date.now()}`;
+              }
             } catch (error) {
               console.error('이미지 가져오기 실패:', error);
-              return null;
+              return `https://picsum.photos/400/300?random=${Date.now()}`;
             }
           };
 
