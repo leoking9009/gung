@@ -313,17 +313,28 @@
 
           const fetchUnsplashImage = async (keyword) => {
             try {
-              // Pixabay API 사용 (무료, API 키 불필요한 프록시 서비스)
+              // Pixabay API 사용 (무료, 키워드 기반 정확한 이미지 검색)
               const query = encodeURIComponent(keyword);
-              const imageUrl = `https://pixabay.com/api/?key=46157976-1b3c0e8ad3e9d0e2f5e1c0d3f&q=${query}&image_type=photo&per_page=3`;
+              const imageUrl = `https://pixabay.com/api/?key=46157976-1b3c0e8ad3e9d0e2f5e1c0d3f&q=${query}&image_type=photo&per_page=5&safesearch=true&order=popular`;
 
               const response = await fetch(imageUrl);
               const data = await response.json();
 
               if (data.hits && data.hits.length > 0) {
+                // 가장 관련성 높은 이미지 선택 (인기순 정렬)
                 return data.hits[0].webformatURL;
               } else {
-                // 기본 이미지 반환 (검색 결과 없을 때)
+                // 검색 결과 없을 때: 키워드에서 첫 단어만 사용해 재검색
+                const firstWord = keyword.split(' ')[0];
+                const fallbackUrl = `https://pixabay.com/api/?key=46157976-1b3c0e8ad3e9d0e2f5e1c0d3f&q=${encodeURIComponent(firstWord)}&image_type=photo&per_page=3&order=popular`;
+
+                const fallbackResponse = await fetch(fallbackUrl);
+                const fallbackData = await fallbackResponse.json();
+
+                if (fallbackData.hits && fallbackData.hits.length > 0) {
+                  return fallbackData.hits[0].webformatURL;
+                }
+
                 return `https://picsum.photos/400/300?random=${Date.now()}`;
               }
             } catch (error) {
@@ -373,13 +384,16 @@ ${availableLocations}
       "subLocation": "세부 장소",
       "visualImage": "이 항목을 표현하는 생생한 시각적 이미지 묘사 (1문장)",
       "story": "이 위치에서 이 항목을 기억하는 스토리 (1-2문장)",
-      "imageKeyword": "이미지 검색에 사용할 영어 키워드 1-2개 (예: photosynthesis plant)"
+      "imageKeyword": "해당 항목의 핵심 개념을 구체적으로 표현하는 영어 키워드 2-3개 (공백으로 구분)"
     }
   ]
 }
 
-각 항목은 순서대로 다른 세부 장소에 배치하고, 생생하고 기억하기 쉬운 이미지를 만들어주세요.
-imageKeyword는 해당 항목을 표현하는 구체적인 영어 단어로 작성해주세요.
+중요:
+1. imageKeyword는 반드시 해당 항목의 실제 내용과 직접 관련된 영어 단어여야 합니다.
+2. 예시: "광합성" → "photosynthesis chloroplast", "프랑스 혁명" → "french revolution bastille", "파이썬" → "python programming code"
+3. 추상적이거나 일반적인 단어 대신, 검색했을 때 정확한 이미지가 나올 수 있는 구체적인 용어를 사용하세요.
+4. 각 항목은 순서대로 다른 세부 장소에 배치하고, 생생하고 기억하기 쉬운 이미지를 만드세요.
 JSON만 출력하고 다른 설명은 추가하지 마세요.`;
 
             const result = await callGeminiAI(prompt);
