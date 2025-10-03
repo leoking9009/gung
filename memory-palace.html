@@ -311,6 +311,18 @@
             return null;
           };
 
+          const fetchUnsplashImage = async (keyword) => {
+            try {
+              // Unsplash Source API (API 키 불필요)
+              const query = encodeURIComponent(keyword);
+              const imageUrl = `https://source.unsplash.com/400x300/?${query}`;
+              return imageUrl;
+            } catch (error) {
+              console.error('이미지 가져오기 실패:', error);
+              return null;
+            }
+          };
+
           const autoMatchWithAI = async () => {
             if (!palaceName || !items) {
               alert('궁전 이름과 기억할 항목을 먼저 입력해주세요!');
@@ -351,17 +363,17 @@ ${availableLocations}
       "name": "항목 이름",
       "subLocation": "세부 장소",
       "visualImage": "이 항목을 표현하는 생생한 시각적 이미지 묘사 (1문장)",
-      "story": "이 위치에서 이 항목을 기억하는 스토리 (1-2문장)"
+      "story": "이 위치에서 이 항목을 기억하는 스토리 (1-2문장)",
+      "imageKeyword": "이미지 검색에 사용할 영어 키워드 1-2개 (예: photosynthesis plant)"
     }
   ]
 }
 
 각 항목은 순서대로 다른 세부 장소에 배치하고, 생생하고 기억하기 쉬운 이미지를 만들어주세요.
+imageKeyword는 해당 항목을 표현하는 구체적인 영어 단어로 작성해주세요.
 JSON만 출력하고 다른 설명은 추가하지 마세요.`;
 
             const result = await callGeminiAI(prompt);
-
-            setAiLoading(false);
 
             if (result) {
               try {
@@ -372,12 +384,17 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
 
                 const aiResponse = JSON.parse(jsonMatch[0]);
 
-                // 첫 번째 항목의 세부 장소를 선택
+                // 각 항목에 이미지 URL 추가
                 if (aiResponse.items && aiResponse.items.length > 0) {
+                  for (let item of aiResponse.items) {
+                    const keyword = item.imageKeyword || item.name;
+                    item.imageUrl = await fetchUnsplashImage(keyword);
+                  }
+
                   setSelectedLocation(aiResponse.location);
                   setSelectedSubLocation(aiResponse.items[0].subLocation);
                   setCategory(aiResponse.category);
-                  setAiStory(JSON.stringify(aiResponse)); // 전체 응답 저장
+                  setAiStory(JSON.stringify(aiResponse));
 
                   // 요약 메시지
                   let summary = `🤖 AI 추천:\n\n`;
@@ -387,7 +404,7 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
                   aiResponse.items.forEach((item, idx) => {
                     summary += `${idx + 1}. ${item.name} → ${item.subLocation}\n`;
                   });
-                  summary += `\n✅ 자동으로 적용되었습니다!`;
+                  summary += `\n✅ 이미지와 함께 자동으로 적용되었습니다!`;
 
                   alert(summary);
                 } else {
@@ -398,6 +415,8 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
                 alert(`AI 응답 파싱 실패: ${error.message}\n\n원본 응답:\n${result}`);
               }
             }
+
+            setAiLoading(false);
           };
 
           const startQuiz = (palace) => {
@@ -557,6 +576,14 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
                                 {aiItemData && (
                                   <div className="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
                                     <p className="text-xs text-purple-800 font-semibold mb-1">📍 위치: {aiItemData.subLocation}</p>
+                                    {aiItemData.imageUrl && (
+                                      <img
+                                        src={aiItemData.imageUrl}
+                                        alt={aiItemData.name}
+                                        className="w-full h-40 object-cover rounded-lg my-2"
+                                        onError={(e) => e.target.style.display = 'none'}
+                                      />
+                                    )}
                                     <p className="text-sm text-gray-700 mb-2">🖼️ {aiItemData.visualImage}</p>
                                     <p className="text-sm text-gray-800">{aiItemData.story}</p>
                                   </div>
@@ -726,6 +753,14 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
                                         </div>
                                         <div className="flex-1">
                                           <p className="font-semibold text-gray-800 text-sm mb-1">{item.name} <span className="text-xs text-purple-600">→ {item.subLocation}</span></p>
+                                          {item.imageUrl && (
+                                            <img
+                                              src={item.imageUrl}
+                                              alt={item.name}
+                                              className="w-full h-32 object-cover rounded-lg mb-2"
+                                              onError={(e) => e.target.style.display = 'none'}
+                                            />
+                                          )}
                                           <p className="text-xs text-gray-600 mb-1">🖼️ {item.visualImage}</p>
                                           <p className="text-xs text-gray-700">{item.story}</p>
                                         </div>
@@ -862,6 +897,14 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
                                             <span className="flex-shrink-0 w-5 h-5 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold">{idx + 1}</span>
                                             <div className="flex-1 min-w-0">
                                               <p className="text-xs font-semibold text-gray-800 truncate">{item.name} <span className="text-purple-600">→ {item.subLocation}</span></p>
+                                              {item.imageUrl && (
+                                                <img
+                                                  src={item.imageUrl}
+                                                  alt={item.name}
+                                                  className="w-full h-20 object-cover rounded my-1"
+                                                  onError={(e) => e.target.style.display = 'none'}
+                                                />
+                                              )}
                                               <p className="text-xs text-gray-600 line-clamp-2">{item.visualImage}</p>
                                             </div>
                                           </div>
