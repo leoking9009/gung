@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사용 가능한 Gemini 모델 확인</title>
+    <style>
+        body {
+            font-family: monospace;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .container {
+            background: #252526;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #3c3c3c;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        input {
+            background: #3c3c3c;
+            color: #d4d4d4;
+        }
+        button {
+            background: #0e639c;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #1177bb;
+        }
+        .result {
+            background: #1e1e1e;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #3c3c3c;
+            max-height: 600px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        .success { color: #4ec9b0; }
+        .error { color: #f48771; }
+        .warning { color: #dcdcaa; }
+        h1 { color: #4ec9b0; }
+        pre {
+            background: #1e1e1e;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            color: #569cd6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 사용 가능한 Gemini 모델 확인</h1>
+
+        <input type="password" id="apiKey" placeholder="API 키 입력 (AIzaSy...)">
+
+        <button onclick="listModels()">🔍 사용 가능한 모델 확인</button>
+
+        <div class="result" id="result">대기 중...</div>
+    </div>
+
+    <script>
+        async function listModels() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const resultDiv = document.getElementById('result');
+
+            if (!apiKey) {
+                resultDiv.innerHTML = '<span class="error">❌ API 키를 입력해주세요!</span>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<span class="warning">⏳ 모델 목록 조회 중...</span>';
+
+            // v1과 v1beta 모두 시도
+            const versions = ['v1', 'v1beta'];
+            let foundModels = [];
+
+            for (const version of versions) {
+                const url = `https://generativelanguage.googleapis.com/${version}/models?key=${apiKey}`;
+
+                try {
+                    console.log(`${version} 시도:`, url.replace(apiKey, 'API_KEY'));
+
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    console.log(`${version} 응답:`, data);
+
+                    if (response.ok && data.models) {
+                        resultDiv.innerHTML += `<br><br><span class="success">✅ ${version} API 사용 가능!</span><br>`;
+                        resultDiv.innerHTML += `<span class="success">총 ${data.models.length}개 모델 발견</span><br><br>`;
+
+                        data.models.forEach((model, idx) => {
+                            const modelName = model.name;
+                            const supportedMethods = model.supportedGenerationMethods || [];
+                            const supportsGenerate = supportedMethods.includes('generateContent');
+
+                            foundModels.push({
+                                version,
+                                name: modelName,
+                                displayName: model.displayName,
+                                supportedMethods,
+                                supportsGenerate
+                            });
+
+                            const color = supportsGenerate ? 'success' : 'warning';
+                            const emoji = supportsGenerate ? '✅' : '⚠️';
+
+                            resultDiv.innerHTML += `<span class="${color}">${emoji} [${idx + 1}] ${modelName}</span><br>`;
+                            resultDiv.innerHTML += `   표시명: ${model.displayName}<br>`;
+                            resultDiv.innerHTML += `   지원 메서드: ${supportedMethods.join(', ')}<br><br>`;
+                        });
+                    } else {
+                        resultDiv.innerHTML += `<br><span class="error">❌ ${version}: ${data.error?.message || '오류'}</span><br>`;
+                    }
+                } catch (error) {
+                    resultDiv.innerHTML += `<br><span class="error">❌ ${version} 오류: ${error.message}</span><br>`;
+                }
+            }
+
+            if (foundModels.length > 0) {
+                // generateContent를 지원하는 모델 필터링
+                const generateModels = foundModels.filter(m => m.supportsGenerate);
+
+                resultDiv.innerHTML += '<br>━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br>';
+                resultDiv.innerHTML += '<span class="warning">💡 앱에서 사용할 수 있는 모델:</span><br>';
+                resultDiv.innerHTML += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br><br>';
+
+                if (generateModels.length > 0) {
+                    generateModels.forEach((model, idx) => {
+                        resultDiv.innerHTML += `<span class="success">${idx + 1}. ${model.name} (${model.version})</span><br>`;
+                    });
+
+                    resultDiv.innerHTML += '<br>━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br>';
+                    resultDiv.innerHTML += '<span class="warning">📝 추천 설정:</span><br>';
+                    resultDiv.innerHTML += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br>';
+
+                    const recommended = generateModels[0];
+                    resultDiv.innerHTML += `<pre>
+API Version: ${recommended.version}
+Model Name: ${recommended.name}
+
+사용 예시 URL:
+https://generativelanguage.googleapis.com/${recommended.version}/${recommended.name}:generateContent
+</pre>`;
+
+                    // 코드 생성
+                    resultDiv.innerHTML += '<br><span class="warning">🔧 앱 수정 코드:</span><br>';
+                    resultDiv.innerHTML += '<pre>';
+                    resultDiv.innerHTML += 'const API_URL = `https://generativelanguage.googleapis.com/';
+                    resultDiv.innerHTML += `${recommended.version}/${recommended.name}:generateContent?key=\${apiKey}\`;\n`;
+                    resultDiv.innerHTML += '</pre>';
+
+                } else {
+                    resultDiv.innerHTML += '<span class="error">❌ generateContent를 지원하는 모델이 없습니다.</span><br>';
+                }
+            } else {
+                resultDiv.innerHTML += '<br><span class="error">❌ 사용 가능한 모델을 찾을 수 없습니다.</span><br>';
+            }
+        }
+    </script>
+</body>
+</html>

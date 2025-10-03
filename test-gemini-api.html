@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini API 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        input, button, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #357ae8;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Gemini API 테스트</h1>
+
+        <div class="info">
+            <strong>📌 API 키 발급 방법:</strong><br>
+            1. <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a> 접속<br>
+            2. "Create API key" 클릭<br>
+            3. 생성된 키를 아래에 입력
+        </div>
+
+        <label><strong>Gemini API 키:</strong></label>
+        <input type="password" id="apiKey" placeholder="AIzaSy... 형식의 API 키를 입력하세요">
+
+        <label><strong>테스트 질문:</strong></label>
+        <textarea id="question" rows="3" placeholder="예: 광합성 과정을 학교의 어느 장소에서 기억하면 좋을까요?">기억의 궁전 앱을 위한 추천: "광합성, 엽록소, 이산화탄소, 산소"를 기억하기 좋은 장소는?</textarea>
+
+        <button id="testBtn" onclick="testGeminiAPI()">🚀 API 테스트 실행</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function testGeminiAPI() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const question = document.getElementById('question').value.trim();
+            const resultDiv = document.getElementById('result');
+            const testBtn = document.getElementById('testBtn');
+
+            if (!apiKey) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ API 키를 입력해주세요!';
+                return;
+            }
+
+            if (!question) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ 질문을 입력해주세요!';
+                return;
+            }
+
+            testBtn.disabled = true;
+            testBtn.textContent = '⏳ API 호출 중...';
+            resultDiv.className = 'result';
+            resultDiv.textContent = '요청을 보내는 중...';
+
+            // 시도할 모델 목록
+            const modelsToTry = [
+                { version: 'v1beta', model: 'gemini-pro' },
+                { version: 'v1beta', model: 'gemini-1.5-flash' },
+                { version: 'v1', model: 'gemini-1.5-flash-latest' },
+                { version: 'v1beta', model: 'gemini-1.5-pro' }
+            ];
+
+            let successModel = null;
+            let lastError = null;
+
+            for (let i = 0; i < modelsToTry.length; i++) {
+                const { version, model } = modelsToTry[i];
+                const API_URL = `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent?key=${apiKey}`;
+
+                console.log(`시도 ${i + 1}/${modelsToTry.length}: ${model} (${version})`);
+                resultDiv.textContent = `시도 중 (${i + 1}/${modelsToTry.length}): ${model}...`;
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: question
+                                }]
+                            }]
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('✅ 성공:', data);
+                        const aiText = data.candidates[0].content.parts[0].text;
+
+                        resultDiv.className = 'result success';
+                        resultDiv.innerHTML = `
+                            <strong>✅ API 호출 성공!</strong><br>
+                            <strong>사용된 모델:</strong> ${model} (${version})<br><br>
+                            <strong>AI 응답:</strong><br>
+                            ${aiText}
+                        `;
+                        successModel = model;
+                        break;
+                    }
+
+                    if (response.status !== 404) {
+                        const errorData = await response.json();
+                        throw new Error(`${model} 오류 (${response.status}): ${errorData.error?.message || '알 수 없는 오류'}`);
+                    }
+
+                    console.log(`⏭️ ${model} 사용 불가, 다음 시도...`);
+
+                } catch (error) {
+                    console.error(`❌ ${model} 실패:`, error);
+                    lastError = error;
+                    if (i === modelsToTry.length - 1) {
+                        throw error;
+                    }
+                }
+            }
+
+            if (!successModel) {
+                throw new Error('모든 모델 시도 실패');
+            }
+
+            try {
+                // 위에서 성공 처리됨
+            } catch (error) {
+                console.error('오류:', error);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>❌ API 호출 실패</strong><br><br>
+                    <strong>오류 내용:</strong><br>
+                    ${error.message}
+                    <br><br>
+                    <strong>확인사항:</strong><br>
+                    1. API 키가 올바른지 확인 (AIza로 시작)<br>
+                    2. API 키가 활성화되어 있는지 확인<br>
+                    3. Google AI Studio에서 새로 발급받기<br>
+                    4. 인터넷 연결 확인
+                `;
+            } finally {
+                testBtn.disabled = false;
+                testBtn.textContent = '🚀 API 테스트 실행';
+            }
+        }
+
+        // Enter 키로도 실행 가능
+        document.getElementById('question').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                testGeminiAPI();
+            }
+        });
+    </script>
+</body>
+</html>
