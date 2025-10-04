@@ -343,6 +343,17 @@
             localStorage.setItem('locationUsage', JSON.stringify(newUsage));
           };
 
+          // 메인 장소의 전체 사용 횟수 계산 (모든 세부 장소 합산)
+          const getLocationUsageCount = (mainLocation) => {
+            let count = 0;
+            Object.keys(locationUsage).forEach(key => {
+              if (key.startsWith(`${mainLocation} > `)) {
+                count += locationUsage[key] || 0;
+              }
+            });
+            return count;
+          };
+
           useEffect(() => {
             if (category && CATEGORY_LOCATIONS[category]) {
               const recommended = CATEGORY_LOCATIONS[category][0];
@@ -1192,7 +1203,7 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
                               <div className="flex-1">
                                 <p className="font-semibold text-gray-800">{loc}</p>
                                 <p className="text-xs text-gray-600">
-                                  세부 장소 {SUB_LOCATIONS[loc] ? SUB_LOCATIONS[loc].length : 0}개
+                                  세부 장소 {SUB_LOCATIONS[loc] ? SUB_LOCATIONS[loc].length : 0}개 · {getLocationUsageCount(loc)}번 사용
                                 </p>
                               </div>
                               <div className="text-right">
@@ -1251,7 +1262,7 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
                                 <Building2 className="w-5 h-5 text-blue-600" />
                                 <div className="flex-1">
                                   <p className="font-semibold text-gray-800">{loc}</p>
-                                  <p className="text-xs text-gray-600">{locationUsage[loc] || 0}번 사용</p>
+                                  <p className="text-xs text-gray-600">{getLocationUsageCount(loc)}번 사용</p>
                                 </div>
                               </div>
                             ))}
