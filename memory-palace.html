@@ -165,9 +165,31 @@
               return;
             }
 
-            const fullLocation = selectedSubLocation
-              ? `${selectedLocation} > ${selectedSubLocation}`
+            // AI 스토리가 있으면 거기서 세부 장소 추출
+            let actualSubLocation = selectedSubLocation;
+            if (aiStory) {
+              try {
+                const aiData = JSON.parse(aiStory);
+                if (aiData.items && aiData.items.length > 0) {
+                  // AI가 매칭한 첫 번째 항목의 세부 장소 사용
+                  actualSubLocation = aiData.items[0].subLocation;
+                  console.log('📍 AI 스토리에서 세부 장소 추출:', actualSubLocation);
+                }
+              } catch (e) {
+                console.error('AI 스토리 파싱 실패:', e);
+              }
+            }
+
+            const fullLocation = actualSubLocation
+              ? `${selectedLocation} > ${actualSubLocation}`
               : selectedLocation;
+
+            console.log('💾 궁전 저장:', {
+              selectedLocation,
+              selectedSubLocation,
+              actualSubLocation,
+              fullLocation
+            });
 
             const newPalace = {
               id: Date.now(),
