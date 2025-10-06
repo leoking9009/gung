@@ -366,17 +366,26 @@
               }, {})
             );
 
-            // 사용자가 이미 장소를 선택했는지 확인
-            const userSelectedLocation = selectedLocation && selectedSubLocation ?
-              `\n\n중요: 사용자가 이미 "${selectedLocation}"의 "${selectedSubLocation}"를 선택했습니다. 반드시 이 장소를 우선적으로 사용하고, 항목들을 "${selectedLocation}"의 다양한 세부 장소에 배치해주세요.` :
-              '';
+            // 사용자가 이미 장소를 선택했는지 확인 (현재 state 값을 변수에 저장)
+            const userSelectedMainLocation = selectedLocation;
+            const userSelectedSubLocation = selectedSubLocation;
+            let locationInstruction = '';
+            let forcedLocation = null;
+
+            if (userSelectedMainLocation && userSelectedSubLocation) {
+              forcedLocation = userSelectedMainLocation;
+              locationInstruction = `\n\n중요: 사용자가 이미 "${userSelectedMainLocation}"의 "${userSelectedSubLocation}"를 선택했습니다. location은 반드시 "${userSelectedMainLocation}"로 설정하고, 항목들을 "${userSelectedMainLocation}"의 다양한 세부 장소에 배치해주세요. 특히 사용자가 선택한 "${userSelectedSubLocation}"를 포함시켜주세요.`;
+            } else if (userSelectedMainLocation) {
+              forcedLocation = userSelectedMainLocation;
+              locationInstruction = `\n\n중요: 사용자가 이미 "${userSelectedMainLocation}"를 선택했습니다. location은 반드시 "${userSelectedMainLocation}"로 설정하고, 항목들을 "${userSelectedMainLocation}"의 다양한 세부 장소에 배치해주세요.`;
+            }
 
             const prompt = `당신은 기억의 궁전(Memory Palace) 전문가입니다.
 주제: "${palaceName}"
 기억할 항목들: ${itemList.join(', ')}
 
 다음 장소들 중 가장 적합한 장소를 선택하고, 각 항목을 세부 장소에 순서대로 배치하여 생생한 이미지와 스토리를 만들어주세요:
-${availableLocations}${userSelectedLocation}
+${availableLocations}${locationInstruction}
 
 응답은 반드시 다음 JSON 형식으로만 작성해주세요:
 {
@@ -419,18 +428,24 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
                     item.imageUrl = await fetchUnsplashImage(keyword);
                   }
 
-                  // AI가 추천한 장소로 설정
-                  setSelectedLocation(aiResponse.location);
+                  // 사용자가 강제한 장소가 있으면 AI 응답을 덮어쓰기
+                  if (forcedLocation) {
+                    aiResponse.location = forcedLocation;
+                  }
 
-                  // 사용자가 선택했던 세부 장소 유지 (같은 메인 장소인 경우)
-                  // 또는 AI가 추천한 첫 번째 세부 장소 사용
-                  const shouldKeepUserSelection =
-                    selectedSubLocation &&
-                    selectedLocation === aiResponse.location &&
-                    SUB_LOCATIONS[aiResponse.location] &&
-                    SUB_LOCATIONS[aiResponse.location].includes(selectedSubLocation);
+                  // AI가 추천한 장소로 설정 (또는 강제된 장소)
+                  const finalLocation = aiResponse.location;
+                  setSelectedLocation(finalLocation);
 
-                  if (!shouldKeepUserSelection) {
+                  // 세부 장소 설정: 사용자가 이미 선택했으면 유지, 아니면 AI 추천 사용
+                  if (userSelectedSubLocation &&
+                      userSelectedMainLocation === finalLocation &&
+                      SUB_LOCATIONS[finalLocation] &&
+                      SUB_LOCATIONS[finalLocation].includes(userSelectedSubLocation)) {
+                    // 사용자가 선택한 세부 장소 유지
+                    setSelectedSubLocation(userSelectedSubLocation);
+                  } else {
+                    // AI가 추천한 첫 번째 세부 장소 사용
                     setSelectedSubLocation(aiResponse.items[0].subLocation);
                   }
 
