@@ -369,12 +369,21 @@
             // 사용자가 이미 장소를 선택했는지 확인 (현재 state 값을 변수에 저장)
             const userSelectedMainLocation = selectedLocation;
             const userSelectedSubLocation = selectedSubLocation;
+
+            console.log('🔍 AI 매칭 시작:', {
+              userSelectedMainLocation,
+              userSelectedSubLocation
+            });
+
             let locationInstruction = '';
             let forcedLocation = null;
 
             if (userSelectedMainLocation && userSelectedSubLocation) {
               forcedLocation = userSelectedMainLocation;
-              locationInstruction = `\n\n중요: 사용자가 이미 "${userSelectedMainLocation}"의 "${userSelectedSubLocation}"를 선택했습니다. location은 반드시 "${userSelectedMainLocation}"로 설정하고, 항목들을 "${userSelectedMainLocation}"의 다양한 세부 장소에 배치해주세요. 특히 사용자가 선택한 "${userSelectedSubLocation}"를 포함시켜주세요.`;
+              locationInstruction = `\n\n🚨 중요: 사용자가 이미 "${userSelectedMainLocation}"의 "${userSelectedSubLocation}"를 명시적으로 선택했습니다.
+- location은 반드시 "${userSelectedMainLocation}"로 설정하세요.
+- 모든 항목의 subLocation을 반드시 "${userSelectedSubLocation}"로만 설정하세요.
+- 다른 세부 장소를 사용하지 마세요. 오직 "${userSelectedSubLocation}" 하나만 사용하세요.`;
             } else if (userSelectedMainLocation) {
               forcedLocation = userSelectedMainLocation;
               locationInstruction = `\n\n중요: 사용자가 이미 "${userSelectedMainLocation}"를 선택했습니다. location은 반드시 "${userSelectedMainLocation}"로 설정하고, 항목들을 "${userSelectedMainLocation}"의 다양한 세부 장소에 배치해주세요.`;
@@ -433,21 +442,39 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
                     aiResponse.location = forcedLocation;
                   }
 
+                  // 사용자가 세부 장소까지 선택했으면 모든 항목의 세부 장소를 강제로 변경
+                  if (userSelectedSubLocation && forcedLocation) {
+                    aiResponse.items = aiResponse.items.map(item => ({
+                      ...item,
+                      subLocation: userSelectedSubLocation
+                    }));
+                    console.log('🔧 모든 항목의 세부 장소를 강제로 변경:', userSelectedSubLocation);
+                  }
+
+                  console.log('✅ AI 응답 (수정 후):', {
+                    aiLocation: aiResponse.location,
+                    aiItems: aiResponse.items.map(i => ({ name: i.name, subLocation: i.subLocation }))
+                  });
+
                   // AI가 추천한 장소로 설정 (또는 강제된 장소)
                   const finalLocation = aiResponse.location;
                   setSelectedLocation(finalLocation);
 
                   // 세부 장소 설정: 사용자가 이미 선택했으면 유지, 아니면 AI 추천 사용
+                  let finalSubLocation;
                   if (userSelectedSubLocation &&
                       userSelectedMainLocation === finalLocation &&
                       SUB_LOCATIONS[finalLocation] &&
                       SUB_LOCATIONS[finalLocation].includes(userSelectedSubLocation)) {
                     // 사용자가 선택한 세부 장소 유지
-                    setSelectedSubLocation(userSelectedSubLocation);
+                    finalSubLocation = userSelectedSubLocation;
+                    console.log('👤 사용자 선택 세부 장소 유지:', finalSubLocation);
                   } else {
                     // AI가 추천한 첫 번째 세부 장소 사용
-                    setSelectedSubLocation(aiResponse.items[0].subLocation);
+                    finalSubLocation = aiResponse.items[0].subLocation;
+                    console.log('🤖 AI 추천 세부 장소 사용:', finalSubLocation);
                   }
+                  setSelectedSubLocation(finalSubLocation);
 
                   setCategory(aiResponse.category);
                   setAiStory(JSON.stringify(aiResponse));
