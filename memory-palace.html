@@ -451,14 +451,10 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
                 }
 
                 const aiResponse = JSON.parse(jsonMatch[0]);
+                console.log('📥 AI JSON 파싱 완료');
 
                 // 각 항목에 이미지 URL 추가
                 if (aiResponse.items && aiResponse.items.length > 0) {
-                  for (let item of aiResponse.items) {
-                    const keyword = item.imageKeyword || item.name;
-                    item.imageUrl = await fetchUnsplashImage(keyword);
-                  }
-
                   console.log('🔍 AI 원본 응답:', {
                     aiLocation: aiResponse.location,
                     aiItems: aiResponse.items.map(i => ({ name: i.name, subLocation: i.subLocation })),
@@ -466,6 +462,12 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
                     userSelectedSubLocation,
                     forcedLocation
                   });
+
+                  for (let item of aiResponse.items) {
+                    const keyword = item.imageKeyword || item.name;
+                    item.imageUrl = await fetchUnsplashImage(keyword);
+                  }
+                  console.log('🖼️ 이미지 URL 추가 완료');
 
                   // 사용자가 강제한 장소가 있으면 AI 응답을 덮어쓰기
                   if (forcedLocation) {
