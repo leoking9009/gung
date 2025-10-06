@@ -65,15 +65,6 @@
           '지하철역': ['개찰구', '플랫폼', '에스컬레이터', '대합실', '편의점', '벤치', '출구']
         };
 
-        const CATEGORY_LOCATIONS = {
-          '역사': ['박물관', '도서관', '사무실'],
-          '과학': ['학교', '박물관', '공원'],
-          '수학': ['학교', '사무실', '도서관'],
-          '언어': ['도서관', '학교', '집'],
-          '업무': ['사무실', '지하철역', '쇼핑몰'],
-          '기타': ['집', '공원', '쇼핑몰']
-        };
-
         function MemoryPalaceApp() {
           const [activeTab, setActiveTab] = useState('create');
           const [palaces, setPalaces] = useState([]);
@@ -81,7 +72,6 @@
           const [locationUsage, setLocationUsage] = useState({});
           const [newLocation, setNewLocation] = useState('');
           const [palaceName, setPalaceName] = useState('');
-          const [category, setCategory] = useState('기타');
           const [items, setItems] = useState('');
           const [selectedLocation, setSelectedLocation] = useState('');
           const [selectedSubLocation, setSelectedSubLocation] = useState('');
@@ -90,7 +80,6 @@
           const [currentQuiz, setCurrentQuiz] = useState(null);
           const [revealedItems, setRevealedItems] = useState([]);
           const [sortBy, setSortBy] = useState('date');
-          const [filterCategory, setFilterCategory] = useState('all');
           const [expandedLocation, setExpandedLocation] = useState(null);
           const [geminiApiKey, setGeminiApiKey] = useState('');
           const [showApiKeyInput, setShowApiKeyInput] = useState(false);
@@ -113,23 +102,6 @@
             localStorage.setItem('memoryPalaces', JSON.stringify(newPalaces));
             localStorage.setItem('locationUsage', JSON.stringify(newUsage));
           };
-
-          useEffect(() => {
-            if (category && CATEGORY_LOCATIONS[category]) {
-              const recommended = CATEGORY_LOCATIONS[category][0];
-              setSelectedLocation(recommended);
-              if (SUB_LOCATIONS[recommended]) {
-                setSelectedSubLocation(SUB_LOCATIONS[recommended][0]);
-              } else {
-                setSelectedSubLocation('');
-              }
-              const fullLocation = SUB_LOCATIONS[recommended]
-                ? `${recommended} > ${SUB_LOCATIONS[recommended][0]}`
-                : recommended;
-              const usage = locationUsage[fullLocation] || 0;
-              setShowWarning(usage > 0);
-            }
-          }, [category, locationUsage]);
 
           const handleLocationChange = (location) => {
             setSelectedLocation(location);
@@ -182,7 +154,6 @@
             const newPalace = {
               id: Date.now(),
               name: palaceName,
-              category,
               location: fullLocation,
               items: itemList,
               createdAt: new Date().toISOString(),
@@ -385,20 +356,86 @@
               userSelectedSubLocation
             });
 
+            // 세부 장소별 물건 예시 매핑
+            const subLocationExamples = {
+              // 집
+              '현관': '신발장, 우산꽂이, 거울, 문손잡이, 현관매트',
+              '거실': '소파, TV, 창문, 커피테이블, 벽시계',
+              '주방': '냉장고, 싱크대, 가스레인지, 식탁, 수납장',
+              '안방': '침대, 옷장, 화장대, 스탠드, 창문',
+              '작은방': '책상, 의자, 책장, 침대, 옷장',
+              '화장실': '세면대, 거울, 변기, 샤워기, 수건걸이',
+              '베란다': '빨래건조대, 화분, 창문, 선반, 바닥',
+              // 학교
+              '교실': '칠판, 교탁, 학생 책상, 사물함, 뒷문',
+              '복도': '게시판, 소화기, 창문, 계단, 휴지통',
+              '운동장': '철봉, 농구골대, 트랙, 벤치, 나무',
+              '도서실': '책장, 열람 테이블, 사서 데스크, 컴퓨터, 의자',
+              '급식실': '배식대, 식판, 식탁, 의자, 잔반통',
+              '강당': '무대, 연단, 의자, 조명, 스크린',
+              '과학실': '실험대, 현미경, 시약장, 수도꼭지, 분젠버너',
+              // 공원
+              '벤치': '등받이, 팔걸이, 좌석, 발판, 옆 쓰레기통',
+              '분수대': '물줄기, 분수대 가장자리, 바닥, 동전, 조명',
+              '놀이터': '그네, 미끄럼틀, 시소, 모래, 철봉',
+              '산책로': '가로등, 표지판, 나무, 벤치, 포장도로',
+              '매점': '진열대, 냉장고, 계산대, 간판, 쓰레기통',
+              '정자': '기둥, 지붕, 테이블, 의자, 난간',
+              '화단': '꽃, 흙, 테두리 돌, 물뿌리개, 표지판',
+              // 쇼핑몰
+              '입구': '회전문, 안내데스크, 엘리베이터, 안내판, 화분',
+              '푸드코트': '주문대, 식탁, 의자, 쓰레기통, 메뉴판',
+              '의류매장': '마네킹, 옷걸이, 거울, 계산대, 피팅룸',
+              '전자제품매장': '진열대, TV, 냉장고, 계산대, 안내판',
+              '서점': '책장, 베스트셀러 코너, 계산대, 의자, 북카페',
+              '화장품매장': '진열대, 테스터, 거울, 계산대, 향수',
+              '주차장': '차량, 기둥, 엘리베이터, 안내판, 출구 표시',
+              // 박물관
+              '입구홀': '안내데스크, 티켓박스, 계단, 안내판, 로커',
+              '전시실1': '유리케이스, 조명, 벽면 패널, 안내문, 의자',
+              '전시실2': '진열대, 조명, 작품, 설명판, 관람로',
+              '뮤지엄샵': '진열대, 기념품, 계산대, 포스터, 책',
+              '카페': '테이블, 의자, 메뉴판, 계산대, 창문',
+              '강당': '무대, 좌석, 스크린, 조명, 연단',
+              '야외전시장': '조각상, 벤치, 나무, 안내판, 바닥',
+              // 도서관
+              '입구': '출입문, 보안게이트, 안내데스크, 안내판, 의자',
+              '열람실': '책상, 의자, 스탠드, 시계, 창문',
+              '서가': '책장, 책, 라벨, 사다리, 통로',
+              '대출데스크': '컴퓨터, 스캐너, 책 반납함, 의자, 안내판',
+              '카페': '커피머신, 테이블, 의자, 메뉴판, 창문',
+              '스터디룸': '테이블, 의자, 화이트보드, 마커, 시계',
+              '휴게실': '소파, 자판기, 잡지, 테이블, TV',
+              // 사무실
+              '입구': '출입문, 보안카드 리더기, 안내판, 우산꽂이, 소파',
+              '회의실': '회의 테이블, 의자, 화이트보드, 프로젝터, 시계',
+              '개인좌석': '책상, 의자, 컴퓨터, 서랍, 휴지통',
+              '휴게실': '커피머신, 소파, 냉장고, 전자레인지, TV',
+              '복사실': '복사기, 프린터, 용지함, 휴지통, 선반',
+              '탕비실': '싱크대, 정수기, 전자레인지, 냉장고, 수납장',
+              '테라스': '벤치, 테이블, 화분, 난간, 파라솔',
+              // 지하철역
+              '개찰구': '카드 리더기, 회전문, 안내판, CCTV, 보안요원',
+              '플랫폼': '안전문, 선로, 의자, 안내판, 스크린도어',
+              '에스컬레이터': '손잡이, 계단, 안내판, 비상정지버튼, 거울',
+              '대합실': '의자, 안내판, 기둥, 자판기, 쓰레기통',
+              '편의점': '진열대, 냉장고, 계산대, 커피머신, 간판',
+              '벤치': '좌석, 등받이, 팔걸이, 광고판, 쓰레기통',
+              '출구': '계단, 안내판, 출구 번호, 엘리베이터, 지도'
+            };
+
             let locationInstruction = '';
             let forcedLocation = null;
 
             if (userSelectedMainLocation && userSelectedSubLocation) {
               forcedLocation = userSelectedMainLocation;
+              const exampleObjects = subLocationExamples[userSelectedSubLocation] || '다양한 물건과 위치';
               locationInstruction = `\n\n🚨 필수 제약사항: 사용자가 "${userSelectedMainLocation}"의 "${userSelectedSubLocation}"를 명시적으로 선택했습니다.
 - location: "${userSelectedMainLocation}" (변경 불가)
 - 모든 항목의 subLocation: "${userSelectedSubLocation}" (변경 불가, 모든 항목 동일)
-- "${userSelectedSubLocation}"에 존재하는 구체적인 물건, 가구, 벽, 바닥 등을 활용하여 각 항목을 배치하세요
-- story 작성 시 "${userSelectedSubLocation}" 안의 서로 다른 물건/위치를 명시하세요
-- 예시:
-  * 거실 → 소파 위, TV 옆, 창문 앞, 커피테이블 아래, 벽시계 옆
-  * 주방 → 냉장고 안, 싱크대 위, 가스레인지 옆, 식탁 위, 수납장 안
-  * 교실 → 칠판 위, 교탁 서랍, 뒷문 옆, 창가 책상, 사물함 안`;
+- "${userSelectedSubLocation}"에 있는 다음 물건/위치들을 활용하여 각 항목을 배치하세요: ${exampleObjects}
+- story 작성 시 위 물건/위치 중 하나를 반드시 명시하세요
+- 각 항목은 서로 다른 물건/위치에 배치하여 혼동을 방지하세요`;
             } else if (userSelectedMainLocation) {
               forcedLocation = userSelectedMainLocation;
               locationInstruction = `\n\n필수 제약사항: 사용자가 "${userSelectedMainLocation}"를 선택했습니다.
@@ -417,7 +454,6 @@ ${availableLocations}${locationInstruction}
 응답은 반드시 다음 JSON 형식으로만 작성해주세요:
 {
   "location": "추천 메인 장소",
-  "category": "역사/과학/수학/언어/업무/기타 중 하나",
   "overallStory": "전체적인 스토리 (1-2문장)",
   "items": [
     {
@@ -511,7 +547,6 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
                   }
                   setSelectedSubLocation(finalSubLocation);
 
-                  setCategory(aiResponse.category);
                   setAiStory(JSON.stringify(aiResponse));
 
                   // 요약 메시지
@@ -575,13 +610,7 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
           };
 
           const getSortedPalaces = () => {
-            let filtered = palaces;
-
-            if (filterCategory !== 'all') {
-              filtered = palaces.filter(p => p.category === filterCategory);
-            }
-
-            return [...filtered].sort((a, b) => {
+            return [...palaces].sort((a, b) => {
               if (sortBy === 'date') {
                 return new Date(b.createdAt) - new Date(a.createdAt);
               } else if (sortBy === 'name') {
@@ -608,7 +637,6 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
                       <h2 className="text-3xl font-bold text-purple-900 mb-2">🧠 기억 테스트</h2>
                       <p className="text-gray-600">{currentQuiz.name}</p>
                       <div className="flex items-center justify-center gap-3 text-sm text-gray-600 mt-2">
-                        <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded">{currentQuiz.category}</span>
                         <span className="flex items-center gap-1">
                           {getLocationIcon(currentQuiz.location)}
                           {currentQuiz.location}
@@ -802,20 +830,7 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
                         <input type="text" value={palaceName} onChange={(e) => setPalaceName(e.target.value)} placeholder="예: 영어 단어 암기" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">카테고리</label>
-                        <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                          <option value="역사">📜 역사</option>
-                          <option value="과학">🔬 과학</option>
-                          <option value="수학">🔢 수학</option>
-                          <option value="언어">💬 언어</option>
-                          <option value="업무">💼 업무</option>
-                          <option value="기타">📌 기타</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          장소 선택 {CATEGORY_LOCATIONS[category] && <span className="text-purple-600 text-xs">(추천: {CATEGORY_LOCATIONS[category].join(', ')})</span>}
-                        </label>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">장소 선택</label>
                         <select value={selectedLocation} onChange={(e) => handleLocationChange(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                           <option value="">장소를 선택하세요</option>
                           {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
@@ -922,30 +937,15 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
                   <div className="bg-white rounded-lg shadow-md p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-2xl font-bold text-purple-900">내 궁전 보관함 ({getSortedPalaces().length}개)</h2>
-                      <div className="flex gap-2">
-                        <select
-                          value={filterCategory}
-                          onChange={(e) => setFilterCategory(e.target.value)}
-                          className="px-3 py-1 border border-gray-300 rounded text-sm"
-                        >
-                          <option value="all">전체</option>
-                          <option value="역사">역사</option>
-                          <option value="과학">과학</option>
-                          <option value="수학">수학</option>
-                          <option value="언어">언어</option>
-                          <option value="업무">업무</option>
-                          <option value="기타">기타</option>
-                        </select>
-                        <select
-                          value={sortBy}
-                          onChange={(e) => setSortBy(e.target.value)}
-                          className="px-3 py-1 border border-gray-300 rounded text-sm"
-                        >
-                          <option value="date">최신순</option>
-                          <option value="name">이름순</option>
-                          <option value="review">복습순</option>
-                        </select>
-                      </div>
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="px-3 py-1 border border-gray-300 rounded text-sm"
+                      >
+                        <option value="date">최신순</option>
+                        <option value="name">이름순</option>
+                        <option value="review">복습순</option>
+                      </select>
                     </div>
                     {getSortedPalaces().length === 0 ? (
                       <div className="text-center py-12 text-gray-500">
@@ -961,7 +961,6 @@ JSON만 출력하고 다른 설명은 추가하지 마세요.`;
                               <div className="flex-1">
                                 <h3 className="text-lg font-bold text-gray-800">{palace.name}</h3>
                                 <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 mt-1">
-                                  <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">{palace.category}</span>
                                   <span className="flex items-center gap-1">
                                     {getLocationIcon(palace.location)}
                                     {palace.location}
