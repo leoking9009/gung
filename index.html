@@ -245,6 +245,12 @@
             const savedPassword = localStorage.getItem('appPassword');
             if (!savedPassword) {
               setIsSettingPassword(true);
+            } else {
+              // 인증 세션 확인
+              const authSession = localStorage.getItem('authSession');
+              if (authSession === 'true') {
+                setIsAuthenticated(true);
+              }
             }
           }, []);
 
@@ -259,6 +265,7 @@
               return;
             }
             localStorage.setItem('appPassword', password);
+            localStorage.setItem('authSession', 'true');
             setIsSettingPassword(false);
             setIsAuthenticated(true);
             setError('');
@@ -268,10 +275,19 @@
             e.preventDefault();
             const savedPassword = localStorage.getItem('appPassword');
             if (password === savedPassword) {
+              localStorage.setItem('authSession', 'true');
               setIsAuthenticated(true);
               setError('');
             } else {
               setError('비밀번호가 올바르지 않습니다.');
+              setPassword('');
+            }
+          };
+
+          const handleLogout = () => {
+            if (window.confirm('로그아웃 하시겠습니까?')) {
+              localStorage.removeItem('authSession');
+              setIsAuthenticated(false);
               setPassword('');
             }
           };
@@ -661,7 +677,7 @@
             }
 
             if (!selectedLocation) {
-              alert('먼저 장소를 선택해주세요!');
+              alert('먼저 메인 장소를 선택해주세요!');
               return;
             }
 
@@ -675,10 +691,18 @@
               return;
             }
 
-            // 선택한 장소의 세부 장소와 물건만 사용
+            // 선택한 세부 장소부터 시작하도록 재정렬
             const selectedLocationData = {};
             if (SUB_LOCATIONS[selectedLocation]) {
-              SUB_LOCATIONS[selectedLocation].forEach(subLoc => {
+              const allSubLocations = SUB_LOCATIONS[selectedLocation];
+              const startIndex = allSubLocations.indexOf(selectedSubLocation);
+
+              // 선택한 세부장소부터 시작해서 순환
+              const reorderedSubLocations = startIndex >= 0
+                ? [...allSubLocations.slice(startIndex), ...allSubLocations.slice(0, startIndex)]
+                : allSubLocations;
+
+              reorderedSubLocations.forEach(subLoc => {
                 selectedLocationData[subLoc] = LOCATION_OBJECTS[subLoc] || [];
               });
             }
@@ -694,8 +718,9 @@ ${JSON.stringify(selectedLocationData, null, 2)}
 **중요: 항목을 순서대로 물건에 1:1 매칭하세요**
 - 1번 항목 → 첫 번째 세부장소의 1번 물건
 - 2번 항목 → 첫 번째 세부장소의 2번 물건
-- ...
+- 5번 항목 → 첫 번째 세부장소의 5번 물건
 - 6번 항목 → 두 번째 세부장소의 1번 물건
+- 7번 항목 → 두 번째 세부장소의 2번 물건
 - 이런 식으로 순차적으로 배치
 
 응답은 반드시 다음 JSON 형식으로만 작성해주세요:
